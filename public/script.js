@@ -1134,9 +1134,10 @@ function showPrintPreview() {
     <html>
     <head>
       <title>Print Preview</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-      <link rel="stylesheet" href="styles.css">
       <style>
         @page {
           size: letter;
@@ -1147,23 +1148,118 @@ function showPrintPreview() {
           background-color: #fff;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
-        #po-preview {
+        .container {
           max-width: 8.5in;
           margin: 0 auto;
           padding: 0.5in;
+        }
+        /* PO Preview specific styles */
+        #po-preview {
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 10px;
           border: none !important;
           box-shadow: none !important;
+          background-color: white;
+        }
+        .row {
+          display: flex;
+          flex-wrap: wrap;
+          margin-right: -15px;
+          margin-left: -15px;
+          clear: both;
+        }
+        .col-6 {
+          flex: 0 0 50%;
+          max-width: 50%;
+          padding-right: 15px;
+          padding-left: 15px;
+          float: left;
+          position: relative;
+          box-sizing: border-box;
+        }
+        .text-end {
+          text-align: right !important;
+        }
+        .mb-4 {
+          margin-bottom: 1.5rem !important;
+        }
+        .mt-4 {
+          margin-top: 1.5rem !important;
+        }
+        .mt-5 {
+          margin-top: 3rem !important;
+        }
+        .ms-2 {
+          margin-left: 0.5rem !important;
+        }
+        .d-inline {
+          display: inline !important;
+        }
+        .text-center {
+          text-align: center !important;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 1rem;
+        }
+        table, th, td {
+          border: 1px solid #dee2e6;
+        }
+        th, td {
+          padding: 0.75rem;
+          text-align: left;
+        }
+        th {
+          font-weight: bold;
+          background-color: #f8f9fa;
         }
         .table {
           width: 100%;
+          margin-bottom: 1rem;
+          color: #212529;
           border-collapse: collapse;
         }
-        .table th, .table td {
-          padding: 8px;
+        .table-bordered {
           border: 1px solid #dee2e6;
         }
-        .text-end {
-          text-align: right;
+        .table thead th {
+          vertical-align: bottom;
+          border-bottom: 2px solid #dee2e6;
+        }
+        h2, h5 {
+          margin-top: 0;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+          line-height: 1.2;
+        }
+        h2 {
+          font-size: 2rem;
+        }
+        h5 {
+          font-size: 1.25rem;
+        }
+        .btn {
+          display: inline-block;
+          font-weight: 400;
+          text-align: center;
+          vertical-align: middle;
+          cursor: pointer;
+          padding: 0.375rem 0.75rem;
+          font-size: 1rem;
+          line-height: 1.5;
+          border-radius: 0.25rem;
+        }
+        .btn-primary {
+          color: #fff;
+          background-color: #0d6efd;
+          border-color: #0d6efd;
+        }
+        .btn-secondary {
+          color: #fff;
+          background-color: #6c757d;
+          border-color: #6c757d;
         }
         @media print {
           .d-print-none {
@@ -1172,9 +1268,23 @@ function showPrintPreview() {
           body { 
             padding: 0; 
           }
+          .container {
+            padding: 0;
+            max-width: none;
+            width: 100%;
+          }
           #po-preview {
             padding: 0;
             border: none !important;
+          }
+          .row {
+            display: flex;
+            page-break-inside: avoid;
+          }
+          .col-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            page-break-inside: avoid;
           }
           button {
             display: none;
@@ -1183,8 +1293,29 @@ function showPrintPreview() {
       </style>
     </head>
     <body>
-      ${previewContent.outerHTML}
+      <div class="container">
+        ${previewContent.outerHTML}
+        <div class="text-center mt-4 d-print-none">
+          <button onclick="window.print();" class="btn btn-primary">
+            <i class="bi bi-printer"></i> Print Document
+          </button>
+          <button onclick="window.close();" class="btn btn-secondary ms-2">
+            <i class="bi bi-x-circle"></i> Close
+          </button>
+        </div>
+      </div>
       <script>
+        // Make sure Bootstrap classes are properly applied
+        document.querySelectorAll('.row').forEach(row => {
+          if (row.children) {
+            Array.from(row.children).forEach(col => {
+              if (!col.classList.contains('col-6')) {
+                col.classList.add('col-6');
+              }
+            });
+          }
+        });
+        
         // Auto-open print dialog immediately
         window.onload = function() {
           window.print();
