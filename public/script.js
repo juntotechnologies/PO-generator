@@ -1122,7 +1122,6 @@ function showPrintPreview() {
   
   // Create a new window with just the preview content
   const previewContent = document.getElementById('po-preview').cloneNode(true);
-  const stampContainer = previewContent.querySelector('#preview-stamp-container');
   
   // Update approval stamps if they exist
   updateApprovalStamp();
@@ -1185,19 +1184,19 @@ function showPrintPreview() {
     </head>
     <body>
       ${previewContent.outerHTML}
-      <div class="text-center mt-4 d-print-none">
-        <button onclick="window.print();" class="btn btn-primary">
-          <i class="bi bi-printer me-1"></i>Print Document
-        </button>
-        <button onclick="window.close();" class="btn btn-secondary ms-2">
-          <i class="bi bi-x-circle me-1"></i>Close
-        </button>
-      </div>
       <script>
-        // Auto-open print dialog after a short delay
-        setTimeout(() => {
+        // Auto-open print dialog immediately
+        window.onload = function() {
           window.print();
-        }, 500);
+          // Auto-close window after printing (or when print dialog is closed)
+          window.addEventListener('afterprint', function() {
+            window.close();
+          });
+          // Fallback in case afterprint doesn't trigger
+          setTimeout(() => {
+            window.close();
+          }, 2000);
+        };
       </script>
     </body>
     </html>
