@@ -1147,11 +1147,12 @@ function showPrintPreview() {
           padding: 20px; 
           background-color: #fff;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          font-size: 13px;
         }
         .container {
           max-width: 8.5in;
           margin: 0 auto;
-          padding: 0.5in;
+          padding: 0.25in;
         }
         /* PO Preview specific styles */
         #po-preview {
@@ -1161,19 +1162,20 @@ function showPrintPreview() {
           border: none !important;
           box-shadow: none !important;
           background-color: white;
+          font-size: 13px;
         }
         .row {
           display: flex;
           flex-wrap: wrap;
-          margin-right: -15px;
-          margin-left: -15px;
+          margin-right: -10px;
+          margin-left: -10px;
           clear: both;
         }
         .col-6 {
           flex: 0 0 50%;
           max-width: 50%;
-          padding-right: 15px;
-          padding-left: 15px;
+          padding-right: 10px;
+          padding-left: 10px;
           float: left;
           position: relative;
           box-sizing: border-box;
@@ -1182,13 +1184,13 @@ function showPrintPreview() {
           text-align: right !important;
         }
         .mb-4 {
-          margin-bottom: 1.5rem !important;
+          margin-bottom: 0.75rem !important;
         }
         .mt-4 {
-          margin-top: 1.5rem !important;
+          margin-top: 0.75rem !important;
         }
         .mt-5 {
-          margin-top: 3rem !important;
+          margin-top: 1.5rem !important;
         }
         .ms-2 {
           margin-left: 0.5rem !important;
@@ -1202,14 +1204,15 @@ function showPrintPreview() {
         table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem;
         }
         table, th, td {
           border: 1px solid #dee2e6;
         }
         th, td {
-          padding: 0.75rem;
+          padding: 0.5rem;
           text-align: left;
+          font-size: 13px;
         }
         th {
           font-weight: bold;
@@ -1217,7 +1220,7 @@ function showPrintPreview() {
         }
         .table {
           width: 100%;
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem;
           color: #212529;
           border-collapse: collapse;
         }
@@ -1230,15 +1233,15 @@ function showPrintPreview() {
         }
         h2, h5 {
           margin-top: 0;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.3rem;
           font-weight: 500;
           line-height: 1.2;
         }
         h2 {
-          font-size: 2rem;
+          font-size: 1.5rem;
         }
         h5 {
-          font-size: 1.25rem;
+          font-size: 1rem;
         }
         .btn {
           display: inline-block;
@@ -1261,12 +1264,34 @@ function showPrintPreview() {
           background-color: #6c757d;
           border-color: #6c757d;
         }
+        /* Approval stamp styling */
+        .approval-stamp {
+          position: absolute;
+          max-width: 80px !important;
+          max-height: 40px !important;
+          opacity: 0.85;
+          transform: rotate(-10deg);
+        }
+        .approval-stamp-second {
+          left: 90px;
+          transform: rotate(5deg);
+        }
+        #preview-stamp-container {
+          position: relative;
+          height: 50px;
+          width: 100%;
+        }
+        #preview-logo {
+          max-height: 60px;
+          max-width: 180px;
+        }
         @media print {
           .d-print-none {
             display: none !important;
           }
           body { 
             padding: 0; 
+            font-size: 13px;
           }
           .container {
             padding: 0;
@@ -1288,6 +1313,21 @@ function showPrintPreview() {
           }
           button {
             display: none;
+          }
+          /* Ensure approval stamp fits on page */
+          .approval-stamp {
+            max-width: 80px !important;
+            max-height: 40px !important;
+          }
+          .approval-stamp-second {
+            left: 90px;
+          }
+          #preview-stamp-container {
+            height: 40px;
+          }
+          table td, table th {
+            padding: 4px;
+            font-size: 12px;
           }
         }
       </style>
@@ -1314,6 +1354,18 @@ function showPrintPreview() {
               }
             });
           }
+        });
+        
+        // Modify stamp size
+        const stampElements = document.querySelectorAll('.approval-stamp');
+        stampElements.forEach(stamp => {
+          stamp.style.maxWidth = '80px';
+          stamp.style.maxHeight = '40px';
+        });
+        
+        // Reduce spacing between elements
+        document.querySelectorAll('.mb-4').forEach(el => {
+          el.style.marginBottom = '0.5rem';
         });
         
         // Auto-open print dialog immediately
