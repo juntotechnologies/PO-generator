@@ -8,7 +8,9 @@ const PdfPrinter = require('pdfmake');
 const multer = require('multer');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Using a dedicated port (4789) for permanent deployment
+// This port is unlikely to conflict with other common applications
+const PORT = process.env.PORT || 4789;
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
