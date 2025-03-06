@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize approval stamp if selected
   updateApprovalStamp();
   
+  // Initialize the preview with current date and PO number
+  updatePreviewDateAndPONumber();
+  
   // Add event listeners
   document.getElementById('addItemBtn').addEventListener('click', addItemRow);
   document.getElementById('addInvoiceItemBtn')?.addEventListener('click', addInvoiceItemRow);
@@ -139,14 +142,20 @@ function setupLineItemListeners(itemRow) {
 function formatDate(dateInput) {
   if (!dateInput) return 'MM/DD/YYYY';
   
-  const dateObj = new Date(dateInput);
+  // Parse the input date string (YYYY-MM-DD) and adjust for timezone
+  const [year, month, day] = dateInput.split('-');
+  const dateObj = new Date(year, month - 1, day); // month is 0-based in JavaScript Date
+  
   return `${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
 }
 
 function formatPONumber(dateInput, suffix = '1') {
   if (!dateInput) return 'CITMMDDYY-1';
   
-  const dateObj = new Date(dateInput);
+  // Parse the input date string (YYYY-MM-DD) and adjust for timezone
+  const [year, month, day] = dateInput.split('-');
+  const dateObj = new Date(year, month - 1, day); // month is 0-based in JavaScript Date
+  
   return `CIT${(dateObj.getMonth() + 1).toString().padStart(2, '0')}${dateObj.getDate().toString().padStart(2, '0')}${dateObj.getFullYear().toString().slice(-2)}-${suffix}`;
 }
 
