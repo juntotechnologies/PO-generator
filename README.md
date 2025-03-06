@@ -18,22 +18,12 @@ This application is configured to run as a permanent service on port 4789, which
 
 ### Quick Setup
 
-#### On Unix/Linux/Mac:
-
 ```bash
 # Make the deployment script executable if not already
-chmod +x deploy.sh
+chmod +x deploy-prod-po-generator.sh
 
 # Run the deployment script
-./deploy.sh
-```
-
-#### On Windows:
-
-```
-# Double-click the deploy.bat file
-# Or run it from the command prompt
-deploy.bat
+./deploy-prod-po-generator.sh
 ```
 
 ### Detailed Setup
@@ -61,7 +51,7 @@ Once deployed, the application will be accessible at:
 npm install
 
 # Run in development mode
-npm run dev
+./run-dev-po-generator.sh
 ```
 
 ## License

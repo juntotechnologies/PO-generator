@@ -10,6 +10,30 @@ This guide will help you set up the PO Generator application as a permanent serv
 
 ## Installation Steps
 
+### Quick Deployment
+
+The easiest way to deploy the application is to use the deployment script:
+
+```bash
+# Make the script executable
+chmod +x deploy-prod-po-generator.sh
+
+# Run the deployment script
+./deploy-prod-po-generator.sh
+```
+
+This script will automatically:
+1. Check for and stop any existing process on port 4789
+2. Install PM2 if not already installed
+3. Create the logs directory
+4. Install dependencies
+5. Start the application as a service
+6. Configure PM2 to start on system boot
+
+### Manual Installation
+
+If you prefer to set up the application manually, follow these steps:
+
 ### 1. Install PM2 globally
 
 ```bash
@@ -42,12 +66,6 @@ pm2 save
 
 ### 6. Set up PM2 to start on system boot
 
-For Linux/Mac:
-```bash
-pm2 startup
-```
-
-For Windows:
 ```bash
 pm2 startup
 ```
@@ -62,6 +80,20 @@ Once deployed, the application will be accessible at:
 - Network: http://YOUR_LOCAL_IP:4789
 
 Replace `YOUR_LOCAL_IP` with the IP address of the machine running the application.
+
+## Development
+
+For development and testing, use the development script:
+
+```bash
+# Make the script executable
+chmod +x run-dev-po-generator.sh
+
+# Run in development mode
+./run-dev-po-generator.sh
+```
+
+This will start the application on port 3000 for development purposes.
 
 ## Monitoring and Management
 
@@ -119,12 +151,9 @@ When you need to update the application:
    git pull
    ```
 
-2. Install any new dependencies:
+2. Run the deployment script again:
    ```bash
-   npm install
+   ./deploy-prod-po-generator.sh
    ```
 
-3. Restart the application:
-   ```bash
-   pm2 restart po-generator
-   ``` 
+This will automatically stop the existing process, install any new dependencies, and start the updated version. 

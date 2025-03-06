@@ -17,6 +17,18 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
+# Check if there's a process running on port 4789
+echo "Checking if port 4789 is in use..."
+PROCESS_PID=$(lsof -ti:4789)
+
+if [ ! -z "$PROCESS_PID" ]; then
+    echo "Found existing process on port 4789 (PID: $PROCESS_PID)"
+    echo "Stopping the process..."
+    pm2 stop po-generator 2>/dev/null || kill -9 $PROCESS_PID
+    sleep 2
+    echo "Process stopped successfully."
+fi
+
 # Install PM2 globally if not already installed
 if ! command -v pm2 &> /dev/null; then
     echo "Installing PM2 globally..."
