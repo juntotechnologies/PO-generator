@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize saved vendors dropdown
   initializeVendorDropdown();
   
+  // Initialize saved line items dropdown
+  initializeLineItemsDropdown();
+  
   // Add event listeners
   document.getElementById('addItemBtn').addEventListener('click', addItemRow);
   document.getElementById('addInvoiceItemBtn')?.addEventListener('click', addInvoiceItemRow);
@@ -40,6 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('logoFile').addEventListener('change', previewCustomLogo);
   document.getElementById('saveVendorBtn').addEventListener('click', saveVendor);
   document.getElementById('savedVendors').addEventListener('change', loadVendor);
+  document.getElementById('saveLineItemsBtn').addEventListener('click', saveLineItems);
+  document.getElementById('savedLineItems').addEventListener('change', loadLineItems);
   
   // Document type toggle
   document.querySelectorAll('input[name="documentType"]').forEach(radio => {
@@ -1563,4 +1568,206 @@ function loadVendor(event) {
     // Update preview
     updatePreviewVendor();
   }
+}
+
+/**
+ * Save the current line items
+ */
+function saveLineItems() {
+  const lineItemsContainer = document.getElementById('lineItems');
+  const lineItemRows = lineItemsContainer.querySelectorAll('.line-item');
+  
+  if (lineItemRows.length === 0) {
+    alert('Please add at least one line item');
+    return;
+  }
+  
+  // Get current date in MM/DD/YYYY format
+  const today = new Date();
+  const saveDate = today.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+  });
+  
+  // Get existing saved line items
+  let savedLineItems = [];
+  try {
+    const savedItemsJSON = localStorage.getItem('savedLineItems');
+    if (savedItemsJSON) {
+      savedLineItems = JSON.parse(savedItemsJSON);
+      if (!Array.isArray(savedLineItems)) {
+        savedLineItems = [];
+      }
+    }
+  } catch (e) {
+    console.error('Error loading saved line items:', e);
+    savedLineItems = [];
+  }
+  
+  // Flag to track if any items were saved
+  let itemsSaved = false;
+  
+  // Save each line item individually
+  lineItemRows.forEach(row => {
+    const quantity = row.querySelector('.item-quantity').value.trim();
+    const description = row.querySelector('.item-description').value.trim();
+    const rate = row.querySelector('.item-rate').value.trim();
+    
+    // Only save items with a description
+    if (description) {
+      itemsSaved = true;
+      
+      // Create a single item entry
+      const lineItem = {
+        description: description,
+        quantity: quantity || '1',
+        rate: rate || '0.00',
+        date: saveDate
+      };
+      
+      // Check if an item with this description already exists
+      const existingIndex = savedLineItems.findIndex(
+        item => item.description.toLowerCase() === description.toLowerCase()
+      );
+      
+      if (existingIndex !== -1) {
+        // Update existing item
+        savedLineItems[existingIndex] = lineItem;
+      } else {
+        // Add new item
+        savedLineItems.push(lineItem);
+      }
+    }
+  });
+  
+  if (!itemsSaved) {
+    alert('Please enter at least one line item description');
+    return;
+  }
+  
+  // Save to localStorage
+  localStorage.setItem('savedLineItems', JSON.stringify(savedLineItems));
+  
+  // Update dropdown
+  updateLineItemsDropdown();
+  
+  alert('Line items saved successfully!');
+}
+
+/**
+ * Load line items from the dropdown selection
+ */
+function loadLineItems(event) {
+  const selectedIndex = event.target.selectedIndex;
+  if (selectedIndex <= 0) return; // Nothing or "Select saved line items..." selected
+  
+  // Get saved line items
+  let savedLineItems = [];
+  try {
+    const savedItemsJSON = localStorage.getItem('savedLineItems');
+    if (savedItemsJSON) {
+      savedLineItems = JSON.parse(savedItemsJSON);
+    }
+  } catch (e) {
+    console.error('Error loading saved line items:', e);
+    return;
+  }
+  
+  // selectedIndex - 1 because the first option is the placeholder
+  const selectedItem = savedLineItems[selectedIndex - 1];
+  if (!selectedItem) {
+    console.error('Selected item not found');
+    return;
+  }
+  
+  // Get the line items container
+  const lineItemsContainer = document.getElementById('lineItems');
+  
+  // Get current line item rows
+  const existingRows = lineItemsContainer.querySelectorAll('.line-item');
+  const firstRow = existingRows[0];
+  
+  // If we have an existing row, update it
+  if (firstRow) {
+    firstRow.querySelector('.item-quantity').value = selectedItem.quantity;
+    firstRow.querySelector('.item-description').value = selectedItem.description;
+    firstRow.querySelector('.item-rate').value = selectedItem.rate;
+    updateRowAmount({ target: firstRow.querySelector('.item-rate') });
+    
+    // Remove any additional rows - we only want to load a single item
+    for (let i = 1; i < existingRows.length; i++) {
+      existingRows[i].remove();
+    }
+  } else {
+    // Create a new row if none exists
+    const newRow = document.createElement('div');
+    newRow.className = 'row mb-3 line-item';
+    newRow.innerHTML = `
+      <div class="col-md-1">
+        <label class="form-label">Qty</label>
+        <input type="number" class="form-control item-quantity" required value="${selectedItem.quantity}">
+      </div>
+      <div class="col-md-7">
+        <label class="form-label">Description</label>
+        <input type="text" class="form-control item-description" required value="${selectedItem.description}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Rate</label>
+        <input type="number" step="0.01" class="form-control item-rate" required value="${selectedItem.rate}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Amount</label>
+        <input type="text" class="form-control item-amount" readonly value="${(selectedItem.quantity * selectedItem.rate).toFixed(2)}">
+      </div>
+    `;
+    lineItemsContainer.appendChild(newRow);
+    setupLineItemListeners(newRow);
+  }
+  
+  // Update totals and preview
+  calculateTotal();
+  updatePreviewLineItems();
+}
+
+/**
+ * Update the line items dropdown with saved templates
+ */
+function updateLineItemsDropdown() {
+  const dropdown = document.getElementById('savedLineItems');
+  if (!dropdown) return;
+  
+  // Clear existing options
+  dropdown.innerHTML = '<option value="">Select saved line items...</option>';
+  
+  // Get saved line items
+  let savedLineItems = [];
+  try {
+    const savedItemsJSON = localStorage.getItem('savedLineItems');
+    if (savedItemsJSON) {
+      savedLineItems = JSON.parse(savedItemsJSON);
+    }
+  } catch (e) {
+    console.error('Error loading saved line items:', e);
+    return;
+  }
+  
+  if (!Array.isArray(savedLineItems) || savedLineItems.length === 0) {
+    return;
+  }
+  
+  // Add options for each saved line item
+  savedLineItems.forEach(item => {
+    const option = document.createElement('option');
+    option.value = item.description;
+    option.textContent = `${item.description} - ${item.date}`;
+    dropdown.appendChild(option);
+  });
+}
+
+/**
+ * Initialize the line items dropdown
+ */
+function initializeLineItemsDropdown() {
+  updateLineItemsDropdown();
 } 
