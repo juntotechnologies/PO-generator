@@ -139,3 +139,13 @@
 2025-03-05 21:27:47: [0mGET /favicon.ico [33m404[0m 3.339 ms - 150[0m
 2025-03-05 21:47:50: Server running on http://localhost:4789
 2025-03-05 21:47:50: To access from other devices on your network, use your IP address: http://<your-ip-address>:4789
+2025-03-05 22:00:07: Server running on http://localhost:4789
+2025-03-05 22:00:07: To access from other devices on your network, use your IP address: http://<your-ip-address>:4789
+2025-03-05 22:00:09: [0mGET / [32m200[0m 4.128 ms - 21988[0m
+2025-03-05 22:00:09: [0mGET /styles.css [36m304[0m 2.228 ms - -[0m
+2025-03-05 22:00:09: [0mGET /assets/images/chem-is-try-logo.png [36m304[0m 2.183 ms - -[0m
+2025-03-05 22:00:09: [0mGET /assets/images/stamp-original.png [36m304[0m 0.824 ms - -[0m
+2025-03-05 22:00:09: [0mGET /tests.js [36m304[0m 1.268 ms - -[0m
+2025-03-05 22:00:09: [0mGET /script.js [32m200[0m 2.185 ms - 52661[0m
+2025-03-05 22:00:09: [0mGET / [36m304[0m 0.631 ms - -[0m
+2025-03-05 22:00:09: [0mGET /assets/images/stamp-cit.png [36m304[0m 0.926 ms - -[0m
