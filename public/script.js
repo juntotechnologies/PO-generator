@@ -1,15 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Set today's date as default in the date picker
   const today = new Date();
-  const formattedDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+  // Convert to EST timezone
+  const estOffset = -4; // EDT offset is -4, EST is -5
+  const estDate = new Date(today.getTime() + (estOffset * 60 * 60 * 1000));
+  const formattedDate = estDate.toISOString().split('T')[0]; // YYYY-MM-DD format
   document.getElementById('poDate').value = formattedDate;
   
   // Also set today's date for invoice fields
   if (document.getElementById('invoiceDate')) {
     document.getElementById('invoiceDate').value = formattedDate;
     
-    // Set due date as today + 30 days
-    const dueDate = new Date();
+    // Set due date as today + 30 days in EST
+    const dueDate = new Date(estDate);
     dueDate.setDate(dueDate.getDate() + 30);
     document.getElementById('dueDate').value = dueDate.toISOString().split('T')[0];
   }
