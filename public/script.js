@@ -29,12 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize the preview with current date and PO number
   updatePreviewDateAndPONumber();
   
+  // Initialize saved vendors dropdown
+  initializeVendorDropdown();
+  
   // Add event listeners
   document.getElementById('addItemBtn').addEventListener('click', addItemRow);
   document.getElementById('addInvoiceItemBtn')?.addEventListener('click', addInvoiceItemRow);
   document.getElementById('useDefaultLogo').addEventListener('change', toggleLogoOptions);
   document.getElementById('uploadCustomLogo').addEventListener('change', toggleLogoOptions);
   document.getElementById('logoFile').addEventListener('change', previewCustomLogo);
+  document.getElementById('saveVendorBtn').addEventListener('click', saveVendor);
+  document.getElementById('savedVendors').addEventListener('change', loadVendor);
   
   // Document type toggle
   document.querySelectorAll('input[name="documentType"]').forEach(radio => {
@@ -1398,4 +1403,164 @@ function showPrintPreview() {
   `);
   
   printWindow.document.close();
+}
+
+/**
+ * Save the current vendor information
+ */
+function saveVendor() {
+  console.log("Save Vendor button clicked"); // For debugging
+  
+  const vendorName = document.getElementById('vendorName').value.trim();
+  
+  if (!vendorName) {
+    alert('Please enter a vendor name');
+    return;
+  }
+
+  const poDate = document.getElementById('poDate').value;
+  // Convert YYYY-MM-DD to MM/DD/YY
+  let formattedDate = "";
+  if (poDate) {
+    const [year, month, day] = poDate.split('-');
+    const shortYear = year.substr(2);
+    formattedDate = `${month}/${day}/${shortYear}`;
+  } else {
+    // Use current date if no date is entered
+    const today = new Date();
+    formattedDate = today.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit', 
+      year: '2-digit'
+    });
+  }
+
+  const vendor = {
+    name: vendorName,
+    address: document.getElementById('vendorAddress').value.trim() || '',
+    city: document.getElementById('vendorCity').value.trim() || '',
+    state: document.getElementById('vendorState').value.trim() || '',
+    zip: document.getElementById('vendorZip').value.trim() || '',
+    country: document.getElementById('vendorCountry').value.trim() || 'USA',
+    saveDate: formattedDate,
+    originalDate: poDate // Store the original date format for future use
+  };
+
+  // Get existing saved vendors
+  let savedVendors = [];
+  try {
+    const savedVendorsJson = localStorage.getItem('savedVendors');
+    if (savedVendorsJson) {
+      savedVendors = JSON.parse(savedVendorsJson);
+    }
+  } catch (e) {
+    console.error('Error parsing saved vendors:', e);
+    savedVendors = [];
+  }
+  
+  if (!Array.isArray(savedVendors)) {
+    savedVendors = [];
+  }
+  
+  // Check if vendor already exists (case insensitive)
+  const existingIndex = savedVendors.findIndex(v => v.name.toLowerCase() === vendor.name.toLowerCase());
+  if (existingIndex !== -1) {
+    savedVendors[existingIndex] = vendor;
+  } else {
+    savedVendors.push(vendor);
+  }
+  
+  // Save back to localStorage
+  localStorage.setItem('savedVendors', JSON.stringify(savedVendors));
+  
+  console.log('Saved to localStorage:', localStorage.getItem('savedVendors')); // For debugging
+  
+  // Update the dropdown immediately
+  updateVendorDropdown(vendor.name);
+  
+  alert('Vendor information saved successfully!');
+}
+
+/**
+ * Update the vendor dropdown with the current saved vendors
+ * @param {string} selectedVendor - The vendor to select after updating
+ */
+function updateVendorDropdown(selectedVendor = '') {
+  const dropdown = document.getElementById('savedVendors');
+  if (!dropdown) {
+    console.error('Vendor dropdown not found');
+    return;
+  }
+  
+  // Clear existing options
+  dropdown.innerHTML = '<option value="">Select a saved vendor...</option>';
+  
+  // Get saved vendors
+  let savedVendors = [];
+  try {
+    const savedVendorsJson = localStorage.getItem('savedVendors');
+    if (savedVendorsJson) {
+      savedVendors = JSON.parse(savedVendorsJson);
+    }
+  } catch (e) {
+    console.error('Error parsing saved vendors:', e);
+    return;
+  }
+  
+  if (!Array.isArray(savedVendors) || savedVendors.length === 0) {
+    console.log('No saved vendors found');
+    return;
+  }
+  
+  console.log('Adding vendors to dropdown:', savedVendors);
+  
+  // Add saved vendors
+  savedVendors.forEach(v => {
+    const option = document.createElement('option');
+    option.value = v.name;
+    option.textContent = `${v.name} - ${v.saveDate}`;
+    dropdown.appendChild(option);
+  });
+  
+  // Select the specified vendor if provided
+  if (selectedVendor) {
+    dropdown.value = selectedVendor;
+  }
+  
+  console.log('Dropdown updated. Option count:', dropdown.options.length);
+}
+
+/**
+ * Initialize the saved vendors dropdown
+ */
+function initializeVendorDropdown() {
+  updateVendorDropdown();
+}
+
+/**
+ * Load a saved vendor into the form
+ */
+function loadVendor(event) {
+  const vendorName = event.target.value;
+  if (!vendorName) return;
+  
+  const savedVendors = JSON.parse(localStorage.getItem('savedVendors') || '[]');
+  const vendor = savedVendors.find(v => v.name === vendorName);
+  
+  if (vendor) {
+    document.getElementById('vendorName').value = vendor.name || '';
+    document.getElementById('vendorAddress').value = vendor.address || '';
+    document.getElementById('vendorCity').value = vendor.city || '';
+    document.getElementById('vendorState').value = vendor.state || '';
+    document.getElementById('vendorZip').value = vendor.zip || '';
+    document.getElementById('vendorCountry').value = vendor.country || 'USA';
+    
+    // If we stored the original date, use it
+    if (vendor.originalDate) {
+      document.getElementById('poDate').value = vendor.originalDate;
+    }
+    
+    // Update preview
+    updatePreviewVendor();
+  }
 } 

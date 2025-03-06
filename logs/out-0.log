@@ -137,3 +137,5 @@
 2025-03-05 21:27:47: [0mGET /assets/images/stamp-original.png [32m200[0m 3.450 ms - 3175[0m
 2025-03-05 21:27:47: [0mGET /assets/images/stamp-cit.png [32m200[0m 1.633 ms - 20374[0m
 2025-03-05 21:27:47: [0mGET /favicon.ico [33m404[0m 3.339 ms - 150[0m
+2025-03-05 21:47:50: Server running on http://localhost:4789
+2025-03-05 21:47:50: To access from other devices on your network, use your IP address: http://<your-ip-address>:4789
