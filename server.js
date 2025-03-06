@@ -381,7 +381,7 @@ app.post('/api/generate-po', upload.single('logo'), async (req, res) => {
                 margin: [0, 2, 0, 0]
               } : null,
               includePaymentTermsLine2 ? { 
-                text: 'All Prices are delivered prices',
+                text: 'All prices are delivered prices',
                 margin: [0, 2, 0, 0]
               } : null
             ].filter(Boolean), // Filter out null values

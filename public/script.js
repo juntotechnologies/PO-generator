@@ -347,10 +347,7 @@ function initializeLineItems() {
   });
 }
 
-/**
- * Adds a new item row to the line items section
- * @returns {HTMLElement} The newly created row element
- */
+// Add a new item row
 function addItemRow() {
   const lineItems = document.getElementById('lineItems');
   const newRow = document.createElement('div');
@@ -385,9 +382,6 @@ function addItemRow() {
   
   // Update the preview
   updatePreviewLineItems();
-  
-  // Return the newly created row
-  return newRow;
 }
 
 /**
@@ -923,7 +917,7 @@ function updatePreviewPaymentTerms() {
   
   if (line2Checked) {
     const line2Element = document.createElement('div');
-    line2Element.textContent = 'All Prices are delivered prices';
+    line2Element.textContent = 'All prices are delivered prices';
     poPaymentTermsElement.appendChild(line2Element);
   }
 }
@@ -1692,58 +1686,44 @@ function loadLineItems(event) {
   
   // Get current line item rows
   const existingRows = lineItemsContainer.querySelectorAll('.line-item');
+  const firstRow = existingRows[0];
   
-  let row; // Variable to hold the row we'll populate
-  
-  // Check if the first row exists and is empty
-  const isFirstRowEmpty = existingRows.length > 0 && 
-                        existingRows[0].querySelector('.item-description').value.trim() === '';
-  
-  if (isFirstRowEmpty) {
-    // If the first row exists but is empty, use it for this item
-    row = existingRows[0];
-  } else if (existingRows.length === 0) {
-    // If there are no existing rows, create the first row
-    row = document.createElement('div');
-    row.className = 'row mb-3 line-item';
-    row.innerHTML = `
+  // If we have an existing row, update it
+  if (firstRow) {
+    firstRow.querySelector('.item-quantity').value = selectedItem.quantity;
+    firstRow.querySelector('.item-description').value = selectedItem.description;
+    firstRow.querySelector('.item-rate').value = selectedItem.rate;
+    updateRowAmount({ target: firstRow.querySelector('.item-rate') });
+    
+    // Remove any additional rows - we only want to load a single item
+    for (let i = 1; i < existingRows.length; i++) {
+      existingRows[i].remove();
+    }
+  } else {
+    // Create a new row if none exists
+    const newRow = document.createElement('div');
+    newRow.className = 'row mb-3 line-item';
+    newRow.innerHTML = `
       <div class="col-md-1">
         <label class="form-label">Qty</label>
-        <input type="number" class="form-control item-quantity" required>
+        <input type="number" class="form-control item-quantity" required value="${selectedItem.quantity}">
       </div>
       <div class="col-md-7">
         <label class="form-label">Description</label>
-        <input type="text" class="form-control item-description" required>
+        <input type="text" class="form-control item-description" required value="${selectedItem.description}">
       </div>
       <div class="col-md-2">
         <label class="form-label">Rate</label>
-        <input type="number" step="0.01" class="form-control item-rate" required>
+        <input type="number" step="0.01" class="form-control item-rate" required value="${selectedItem.rate}">
       </div>
       <div class="col-md-2">
         <label class="form-label">Amount</label>
-        <input type="text" class="form-control item-amount" readonly>
+        <input type="text" class="form-control item-amount" readonly value="${(selectedItem.quantity * selectedItem.rate).toFixed(2)}">
       </div>
     `;
-    lineItemsContainer.appendChild(row);
-    setupLineItemListeners(row);
-    
-    // Only add remove button if it's not the only row
-    if (existingRows.length > 0) {
-      addRemoveButton(row);
-    }
-  } else {
-    // Add a new row
-    row = addItemRow();
+    lineItemsContainer.appendChild(newRow);
+    setupLineItemListeners(newRow);
   }
-  
-  // Populate the row with the selected item data
-  row.querySelector('.item-quantity').value = selectedItem.quantity;
-  row.querySelector('.item-description').value = selectedItem.description;
-  row.querySelector('.item-rate').value = selectedItem.rate;
-  updateRowAmount({ target: row.querySelector('.item-rate') });
-  
-  // Reset the dropdown to the default option
-  event.target.selectedIndex = 0;
   
   // Update totals and preview
   calculateTotal();

@@ -159,3 +159,13 @@
 2025-03-05 22:22:01: [0mGET / [36m304[0m 1.263 ms - -[0m
 2025-03-05 22:22:01: [0mGET /assets/images/stamp-original.png [36m304[0m 1.379 ms - -[0m
 2025-03-05 22:22:01: [0mGET /assets/images/stamp-cit.png [36m304[0m 0.586 ms - -[0m
+2025-03-05 22:29:38: Server running on http://localhost:4789
+2025-03-05 22:29:38: To access from other devices on your network, use your IP address: http://<your-ip-address>:4789
+2025-03-05 22:29:41: [0mGET / [36m304[0m 2.389 ms - -[0m
+2025-03-05 22:29:41: [0mGET /styles.css [36m304[0m 2.328 ms - -[0m
+2025-03-05 22:29:41: [0mGET /assets/images/chem-is-try-logo.png [36m304[0m 1.911 ms - -[0m
+2025-03-05 22:29:41: [0mGET /assets/images/stamp-original.png [36m304[0m 0.570 ms - -[0m
+2025-03-05 22:29:41: [0mGET /tests.js [36m304[0m 0.691 ms - -[0m
+2025-03-05 22:29:41: [0mGET /script.js [32m200[0m 3.847 ms - 59408[0m
+2025-03-05 22:29:41: [0mGET / [36m304[0m 0.576 ms - -[0m
+2025-03-05 22:29:41: [0mGET /assets/images/stamp-cit.png [36m304[0m 0.824 ms - -[0m
