@@ -1087,6 +1087,9 @@ function updateApprovalStamp() {
     return;
   }
   
+  // Set positioning style for container
+  stampContainer.setAttribute('style', 'position: absolute; width: 100%; right: 0; top: 0; overflow: visible;');
+  
   // Add original stamp if selected
   if (useOriginalStamp) {
     const originalStamp = document.createElement('img');
@@ -1094,7 +1097,7 @@ function updateApprovalStamp() {
     originalStamp.src = 'assets/images/stamp-original.png';
     originalStamp.alt = 'Original Approval Stamp';
     originalStamp.className = 'approval-stamp';
-    originalStamp.style.zIndex = '10'; // Higher z-index so the original stamp appears on top
+    originalStamp.setAttribute('style', 'position: absolute !important; top: -65px !important; right: 30px !important; left: auto !important; z-index: 10 !important; max-width: 270px !important; max-height: 135px !important; transform: rotate(-10deg) !important; opacity: 0.6 !important;');
     stampContainer.appendChild(originalStamp);
   }
   
@@ -1105,7 +1108,11 @@ function updateApprovalStamp() {
     citStamp.src = 'assets/images/stamp-cit.png';
     citStamp.alt = 'CIT Approval Stamp';
     citStamp.className = useOriginalStamp ? 'approval-stamp approval-stamp-second' : 'approval-stamp';
-    citStamp.style.zIndex = '5'; // Lower z-index so it appears below the original stamp
+    if (useOriginalStamp) {
+      citStamp.setAttribute('style', 'position: absolute !important; top: -65px !important; right: 80px !important; left: auto !important; z-index: 5 !important; max-width: 270px !important; max-height: 135px !important; transform: rotate(5deg) !important; opacity: 0.95 !important;');
+    } else {
+      citStamp.setAttribute('style', 'position: absolute !important; top: -65px !important; right: 30px !important; left: auto !important; z-index: 10 !important; max-width: 270px !important; max-height: 135px !important; transform: rotate(-10deg) !important; opacity: 0.6 !important;');
+    }
     stampContainer.appendChild(citStamp);
   }
   
@@ -1144,20 +1151,49 @@ function showPrintPreview() {
   // First update the preview with current data
   updatePreview();
   
-  // Create a new window with just the preview content
-  const previewContent = document.getElementById('po-preview').cloneNode(true);
-  
   // Update approval stamps if they exist
   updateApprovalStamp();
   
+  // Get the content from the preview
+  const previewContent = document.getElementById('po-preview');
+  
+  // Get the values we need to recreate in the print preview
+  const logo = previewContent.querySelector('#preview-logo').outerHTML;
+  const documentType = previewContent.querySelector('#preview-document-type').textContent;
+  const vendorName = previewContent.querySelector('#preview-vendor-name').textContent;
+  const vendorAddress = previewContent.querySelector('#preview-vendor-address').textContent;
+  const vendorCityState = previewContent.querySelector('#preview-vendor-city-state').textContent;
+  const poNumber = previewContent.querySelector('#preview-po-number').textContent;
+  const date = previewContent.querySelector('#preview-date').textContent;
+  const activity = previewContent.querySelector('#preview-activity').textContent;
+  
+  // Get payment terms
+  let paymentTerms = '';
+  const poPaymentTerms = previewContent.querySelector('#po-payment-terms');
+  if (poPaymentTerms && !poPaymentTerms.classList.contains('d-none')) {
+    paymentTerms = poPaymentTerms.innerHTML;
+  }
+  
+  // Get line items table
+  const tableHeader = previewContent.querySelector('#table-header-row').innerHTML;
+  const lineItems = previewContent.querySelector('#preview-line-items').innerHTML;
+  const total = previewContent.querySelector('#preview-total').textContent;
+  
+  // Get stamp information
+  const useOriginalStamp = document.getElementById('useOriginalStamp').checked;
+  const useCitStamp = document.getElementById('useCitStamp').checked;
+  
+  // Create the print window
   const printWindow = window.open('', '_blank', 'width=800,height=600');
   
-  // Add necessary styles for the print preview
+  // Set the document title based on the document type
+  const documentTitle = documentType === 'Purchase Order' ? `PO ${poNumber}` : `Invoice ${previewContent.querySelector('#preview-invoice-number')?.textContent || ''}`;
+  
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Print Preview</title>
+      <title>${documentTitle} - Chem Is Try Inc</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -1178,7 +1214,6 @@ function showPrintPreview() {
           margin: 0 auto;
           padding: 0.25in;
         }
-        /* PO Preview specific styles */
         #po-preview {
           max-width: 100%;
           margin: 0 auto;
@@ -1288,28 +1323,30 @@ function showPrintPreview() {
           background-color: #6c757d;
           border-color: #6c757d;
         }
-        /* Approval stamp styling */
-        .approval-stamp {
+        .signature-section {
           position: absolute;
-          max-width: 270px !important;
-          max-height: 135px !important;
-          opacity: 0.85;
-          transform: rotate(-10deg);
-          z-index: 10;
-        }
-        .approval-stamp-second {
-          left: 150px;
-          transform: rotate(5deg);
-          z-index: 5;
-        }
-        #preview-stamp-container {
-          position: relative;
-          height: 140px;
+          bottom: 100px;
           width: 100%;
         }
-        #preview-logo {
-          max-height: 60px;
-          max-width: 180px;
+        .original-stamp {
+          position: absolute;
+          top: -65px;
+          right: 30px;
+          max-width: 270px;
+          max-height: 135px;
+          z-index: 10;
+          transform: rotate(-10deg);
+          opacity: 0.6;
+        }
+        .cit-stamp {
+          position: absolute;
+          top: -65px;
+          right: 80px;
+          max-width: 350px;
+          max-height: 175px;
+          z-index: 5;
+          transform: rotate(5deg);
+          opacity: 0.95;
         }
         @media print {
           .d-print-none {
@@ -1340,19 +1377,6 @@ function showPrintPreview() {
           button {
             display: none;
           }
-          /* Ensure approval stamp fits on page */
-          .approval-stamp {
-            max-width: 270px !important;
-            max-height: 135px !important;
-            z-index: 10 !important;
-          }
-          .approval-stamp-second {
-            left: 150px;
-            z-index: 5 !important;
-          }
-          #preview-stamp-container {
-            height: 140px;
-          }
           table td, table th {
             padding: 4px;
             font-size: 12px;
@@ -1362,7 +1386,115 @@ function showPrintPreview() {
     </head>
     <body>
       <div class="container">
-        ${previewContent.outerHTML}
+        <div id="po-preview" class="p-3 border rounded bg-white">
+          <!-- PO Header -->
+          <div class="row mb-4">
+            <div class="col-6">
+              ${logo}
+              <div>
+                <div>160-4 Liberty Street</div>
+                <div>Metuchen, NJ 08840</div>
+                <div>732-372-7311</div>
+                <div>pporwal@chem-is-try.com</div>
+                <div>www.chem-is-try.com</div>
+              </div>
+            </div>
+            <div class="col-6 text-end">
+              <h2 class="mb-0">${documentType}</h2>
+            </div>
+          </div>
+          
+          <!-- Vendor and Ship To -->
+          <div class="row mb-4">
+            <div class="col-6">
+              <h5>VENDOR</h5>
+              <div>${vendorName}</div>
+              <div>${vendorAddress}</div>
+              <div>${vendorCityState}</div>
+            </div>
+            <div class="col-6">
+              <h5>SHIP TO</h5>
+              <div>Chem Is Try Inc</div>
+              <div>160-4 Liberty Street</div>
+              <div>Metuchen, NJ 08840 US</div>
+            </div>
+          </div>
+          
+          <!-- PO Number and Date -->
+          <div class="row mb-4">
+            <div class="col-6">
+              <h5 class="d-inline">P.O. NO. </h5>
+              <span>${poNumber}</span>
+            </div>
+            <div class="col-6">
+              <h5 class="d-inline">DATE </h5>
+              <span>${date}</span>
+            </div>
+          </div>
+          
+          <!-- Activity -->
+          <div class="mb-4">
+            <h5>ACTIVITY</h5>
+            <div>${activity}</div>
+          </div>
+          
+          <!-- Payment Terms -->
+          <div class="mb-4">
+            ${paymentTerms}
+          </div>
+          
+          <!-- Item Table -->
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                ${tableHeader}
+              </tr>
+            </thead>
+            <tbody>
+              ${lineItems}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-end"><strong>TOTAL</strong></td>
+                <td class="text-end">${total}</td>
+              </tr>
+            </tfoot>
+          </table>
+          
+          <!-- Notes Section (Initially Hidden) -->
+          <div class="mb-4 d-none" id="invoice-notes-section">
+            <h5>NOTES</h5>
+            <div id="preview-notes">--</div>
+          </div>
+          
+          <!-- Spacer div to ensure content doesn't overlap with signature -->
+          <div style="height: 250px; margin-bottom: 20px;"></div>
+          
+          <!-- Signature section with relative positioning -->
+          <div id="signature-container" style="position: relative; height: 120px;">
+            <!-- Absolutely positioned signature section -->
+            <div class="signature-section" style="position: absolute; bottom: 0; width: 100%;">
+              <div class="row">
+                <div class="col-6">
+                  <div>Approved By</div>
+                  <div class="mt-3">
+                    <div class="mt-1">_______________________________</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <!-- Empty column for spacing -->
+                </div>
+              </div>
+              
+              <!-- Absolutely positioned stamps container -->
+              <div style="position: absolute; width: 100%; height: 100px; top: -100px; overflow: visible;">
+                ${useOriginalStamp ? '<img src="assets/images/stamp-original.png" alt="Original Approval Stamp" class="original-stamp" style="position: absolute; right: 30px; top: -65px; opacity: 0.6; z-index: 10; transform: rotate(-10deg); max-width: 270px;">' : ''}
+                ${useCitStamp ? '<img src="assets/images/stamp-cit.png" alt="CIT Approval Stamp" class="cit-stamp" style="position: absolute; right: 80px; top: -65px; opacity: 0.95; z-index: 5; transform: rotate(5deg); max-width: 270px;">' : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div class="text-center mt-4 d-print-none">
           <button onclick="window.print();" class="btn btn-primary">
             <i class="bi bi-printer"></i> Print Document
@@ -1372,48 +1504,51 @@ function showPrintPreview() {
           </button>
         </div>
       </div>
+      
       <script>
-        // Make sure Bootstrap classes are properly applied
-        document.querySelectorAll('.row').forEach(row => {
-          if (row.children) {
-            Array.from(row.children).forEach(col => {
-              if (!col.classList.contains('col-6')) {
-                col.classList.add('col-6');
-              }
-            });
-          }
-        });
-        
-        // Modify stamp size
-        const stampElements = document.querySelectorAll('.approval-stamp');
-        stampElements.forEach(stamp => {
-          stamp.style.maxWidth = '270px';
-          stamp.style.maxHeight = '135px';
-          
-          // Set z-index for proper layering
-          if (stamp.className.includes('approval-stamp-second')) {
-            stamp.style.zIndex = '5';
-          } else {
-            stamp.style.zIndex = '10';
-          }
-        });
-        
-        // Reduce spacing between elements
-        document.querySelectorAll('.mb-4').forEach(el => {
-          el.style.marginBottom = '0.5rem';
-        });
-        
         // Auto-open print dialog immediately
         window.onload = function() {
-          window.print();
-          // Auto-close window after printing (or when print dialog is closed)
-          window.addEventListener('afterprint', function() {
-            window.close();
-          });
-          // Fallback in case afterprint doesn't trigger
-          setTimeout(() => {
-            window.close();
-          }, 2000);
+          // Set document location to hide about:blank
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, "/print-preview");
+          }
+          
+          // Preload images before printing
+          const images = document.querySelectorAll('img');
+          let imagesLoaded = 0;
+          
+          function checkAllImagesLoaded() {
+            imagesLoaded++;
+            if (imagesLoaded === images.length) {
+              // All images loaded, now print
+              window.print();
+              
+              // Auto-close window after printing
+              window.addEventListener('afterprint', function() {
+                window.close();
+              });
+              
+              // Fallback in case afterprint doesn't trigger
+              setTimeout(() => {
+                window.close();
+              }, 2000);
+            }
+          }
+          
+          // Check if we have images to load
+          if (images.length > 0) {
+            images.forEach(img => {
+              if (img.complete) {
+                checkAllImagesLoaded();
+              } else {
+                img.addEventListener('load', checkAllImagesLoaded);
+                img.addEventListener('error', checkAllImagesLoaded); // Handle error case too
+              }
+            });
+          } else {
+            // No images, just print
+            window.print();
+          }
         };
       </script>
     </body>

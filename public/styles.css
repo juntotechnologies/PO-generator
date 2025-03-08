@@ -285,25 +285,48 @@ body {
   
   /* Approval stamps in print - larger size */
   .approval-stamp {
-    display: block !important;
-    opacity: 0.9 !important;
+    position: absolute !important;
+    top: -65px !important;
+    right: 30px !important;
+    left: auto !important;
     max-width: 270px !important;
     max-height: 135px !important;
-    position: relative !important;
     z-index: 10 !important;
+    transform: rotate(-10deg) !important;
+    opacity: 0.6 !important; /* Reduced opacity for original stamp */
   }
   
   .approval-stamp-second {
-    left: 150px !important;
-    transform: rotate(5deg) !important;
+    position: absolute !important;
+    top: -65px !important;
+    right: 80px !important;
+    left: auto !important;
     z-index: 5 !important;
+    transform: rotate(5deg) !important;
+    max-width: 270px !important;
+    max-height: 135px !important;
+    opacity: 0.95 !important; /* Increased opacity for CIT stamp */
   }
   
   #preview-stamp-container {
+    position: absolute !important;
+    width: 100% !important;
+    right: 0 !important;
+    top: 0 !important;
+    overflow: visible !important;
+  }
+  
+  /* Signature section positioning */
+  .signature-section {
+    position: absolute !important;
+    bottom: 0 !important;
+    width: 100% !important;
+  }
+  
+  #signature-container {
     position: relative !important;
-    height: 140px !important;
-    display: block !important;
-    min-height: 140px !important;
+    height: 120px !important;
+    margin-top: 20px !important;
   }
   
   /* Instructions for saving as PDF */
@@ -317,60 +340,56 @@ body {
   }
 }
 
-/* Approval stamp styling */
+/* Stamp Styles */
 .approval-stamp {
-  position: absolute;
-  max-width: 270px;
-  max-height: 135px;
-  top: -25px;
-  left: 30px;
-  z-index: 10;
-  opacity: 0.85;
+  position: absolute !important;
+  top: -65px !important;
+  right: 30px !important;
+  left: auto !important;
+  max-width: 270px !important;
+  height: auto;
+  margin-bottom: 10px;
+  z-index: 10 !important;
   transform: rotate(-10deg);
-  display: block;
+  opacity: 0.6 !important; /* Reduced opacity for original stamp */
 }
 
 .approval-stamp-second {
-  left: 180px;
+  position: absolute !important;
+  top: -65px !important;
+  right: 80px !important;
+  left: auto !important;
+  z-index: 5 !important;
   transform: rotate(5deg);
-  top: -15px;
-  z-index: 5;
+  max-width: 270px !important;
+  max-height: 135px !important;
+  opacity: 0.95 !important; /* Increased opacity for CIT stamp */
 }
 
 #preview-stamp-container {
-  position: relative;
-  min-height: 140px;
-  margin-top: 10px;
-  display: block;
+  position: absolute !important;
+  width: 100% !important;
+  right: 0 !important;
+  top: 0 !important;
+  overflow: visible !important;
+}
+
+/* Signature section positioning */
+.signature-section {
+  position: absolute !important;
+  bottom: 0 !important;
+  width: 100% !important;
+}
+
+#signature-container {
+  position: relative !important;
+  height: 120px !important;
+  margin-top: 20px !important;
 }
 
 /* Hide Generate PO button */
 form [type="submit"] {
   display: none !important;
-}
-
-/* Stamp Styles */
-.approval-stamp {
-  max-width: 270px;
-  height: auto;
-  position: relative;
-  margin-bottom: 10px;
-  z-index: 10;
-}
-
-.approval-stamp-second {
-  position: absolute;
-  top: -10px;
-  left: 120px;
-  z-index: 5;
-  transform: rotate(-5deg);
-}
-
-#preview-stamp-container {
-  position: relative;
-  min-height: 140px;
-  margin-top: 10px;
-  display: block;
 }
 
 /* Style for the direct print button */
