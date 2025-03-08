@@ -1094,6 +1094,7 @@ function updateApprovalStamp() {
     originalStamp.src = 'assets/images/stamp-original.png';
     originalStamp.alt = 'Original Approval Stamp';
     originalStamp.className = 'approval-stamp';
+    originalStamp.style.zIndex = '10'; // Higher z-index so the original stamp appears on top
     stampContainer.appendChild(originalStamp);
   }
   
@@ -1104,6 +1105,7 @@ function updateApprovalStamp() {
     citStamp.src = 'assets/images/stamp-cit.png';
     citStamp.alt = 'CIT Approval Stamp';
     citStamp.className = useOriginalStamp ? 'approval-stamp approval-stamp-second' : 'approval-stamp';
+    citStamp.style.zIndex = '5'; // Lower z-index so it appears below the original stamp
     stampContainer.appendChild(citStamp);
   }
   
@@ -1289,18 +1291,20 @@ function showPrintPreview() {
         /* Approval stamp styling */
         .approval-stamp {
           position: absolute;
-          max-width: 80px !important;
-          max-height: 40px !important;
+          max-width: 270px !important;
+          max-height: 135px !important;
           opacity: 0.85;
           transform: rotate(-10deg);
+          z-index: 10;
         }
         .approval-stamp-second {
-          left: 90px;
+          left: 150px;
           transform: rotate(5deg);
+          z-index: 5;
         }
         #preview-stamp-container {
           position: relative;
-          height: 50px;
+          height: 140px;
           width: 100%;
         }
         #preview-logo {
@@ -1338,14 +1342,16 @@ function showPrintPreview() {
           }
           /* Ensure approval stamp fits on page */
           .approval-stamp {
-            max-width: 80px !important;
-            max-height: 40px !important;
+            max-width: 270px !important;
+            max-height: 135px !important;
+            z-index: 10 !important;
           }
           .approval-stamp-second {
-            left: 90px;
+            left: 150px;
+            z-index: 5 !important;
           }
           #preview-stamp-container {
-            height: 40px;
+            height: 140px;
           }
           table td, table th {
             padding: 4px;
@@ -1381,8 +1387,15 @@ function showPrintPreview() {
         // Modify stamp size
         const stampElements = document.querySelectorAll('.approval-stamp');
         stampElements.forEach(stamp => {
-          stamp.style.maxWidth = '80px';
-          stamp.style.maxHeight = '40px';
+          stamp.style.maxWidth = '270px';
+          stamp.style.maxHeight = '135px';
+          
+          // Set z-index for proper layering
+          if (stamp.className.includes('approval-stamp-second')) {
+            stamp.style.zIndex = '5';
+          } else {
+            stamp.style.zIndex = '10';
+          }
         });
         
         // Reduce spacing between elements
