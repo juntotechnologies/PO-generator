@@ -234,7 +234,7 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         width, height = letter
         
         # Set up the document
-        p.setTitle(f"Purchase Order #{purchase_order.po_number}")
+        p.setTitle(f"Purchase Order - {purchase_order.po_number}")
         
         # Add company logo - try multiple paths to find the logo
         logo_paths = [
@@ -264,63 +264,69 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         
         # Add header
         p.setFont("Helvetica-Bold", 18)
-        p.drawString(1*inch, height - 1*inch, f"PURCHASE ORDER #{purchase_order.po_number}")
+        p.drawString(1*inch, height - 1*inch, "PURCHASE ORDER")
         
-        # Add date
+        # Add PO number on a separate line below the title
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(1*inch, height - 1.3*inch, f"{purchase_order.po_number}")
+        
+        # Add date in the top right corner
         p.setFont("Helvetica", 12)
-        p.drawString(1*inch, height - 1.3*inch, f"Date: {purchase_order.date.strftime('%B %d, %Y')}")
+        date_text = f"Date: {purchase_order.date.strftime('%B %d, %Y')}"
+        date_width = p.stringWidth(date_text, "Helvetica", 12)
+        p.drawString(width - 1*inch - date_width, height - 1*inch, date_text)
         
         # Add company information
         p.setFont("Helvetica", 10)
-        p.drawString(1*inch, height - 1.6*inch, "Chem Is Try Inc")
-        p.drawString(1*inch, height - 1.8*inch, "160-4 Liberty Street")
-        p.drawString(1*inch, height - 2.0*inch, "Metuchen, NJ 08840")
-        p.drawString(1*inch, height - 2.2*inch, "Phone: 732-372-7311")
-        p.drawString(1*inch, height - 2.4*inch, "Email: info@chem-is-try.com")
-        p.drawString(1*inch, height - 2.6*inch, "Website: www.chem-is-try.com")
+        p.drawString(1*inch, height - 1.7*inch, "Chem Is Try Inc")
+        p.drawString(1*inch, height - 1.9*inch, "160-4 Liberty Street")
+        p.drawString(1*inch, height - 2.1*inch, "Metuchen, NJ 08840")
+        p.drawString(1*inch, height - 2.3*inch, "Phone: 732-372-7311")
+        p.drawString(1*inch, height - 2.5*inch, "Email: info@chem-is-try.com")
+        p.drawString(1*inch, height - 2.7*inch, "Website: www.chem-is-try.com")
         
         # Add vendor information
         p.setFont("Helvetica-Bold", 12)
-        p.drawString(1*inch, height - 3.0*inch, "Vendor:")
+        p.drawString(1*inch, height - 3.1*inch, "Vendor:")
         p.setFont("Helvetica", 10)
-        p.drawString(1*inch, height - 3.2*inch, purchase_order.vendor.name)
-        p.drawString(1*inch, height - 3.4*inch, purchase_order.vendor.address)
-        p.drawString(1*inch, height - 3.6*inch, f"{purchase_order.vendor.city}, {purchase_order.vendor.state} {purchase_order.vendor.zip_code}")
-        p.drawString(1*inch, height - 3.8*inch, purchase_order.vendor.country)
+        p.drawString(1*inch, height - 3.3*inch, purchase_order.vendor.name)
+        p.drawString(1*inch, height - 3.5*inch, purchase_order.vendor.address)
+        p.drawString(1*inch, height - 3.7*inch, f"{purchase_order.vendor.city}, {purchase_order.vendor.state} {purchase_order.vendor.zip_code}")
+        p.drawString(1*inch, height - 3.9*inch, purchase_order.vendor.country)
         
         # Add shipping information
         p.setFont("Helvetica-Bold", 12)
-        p.drawString(5*inch, height - 3.0*inch, "Ship To:")
+        p.drawString(5*inch, height - 3.1*inch, "Ship To:")
         p.setFont("Helvetica", 10)
-        p.drawString(5*inch, height - 3.2*inch, "Chem Is Try Inc")
-        p.drawString(5*inch, height - 3.4*inch, "160-4 Liberty Street")
-        p.drawString(5*inch, height - 3.6*inch, "Metuchen, NJ 08840 US")
+        p.drawString(5*inch, height - 3.3*inch, "Chem Is Try Inc")
+        p.drawString(5*inch, height - 3.5*inch, "160-4 Liberty Street")
+        p.drawString(5*inch, height - 3.7*inch, "Metuchen, NJ 08840 US")
         
         # Add payment terms
         p.setFont("Helvetica-Bold", 12)
-        p.drawString(1*inch, height - 4.2*inch, "Payment Terms:")
+        p.drawString(1*inch, height - 4.3*inch, "Payment Terms:")
         p.setFont("Helvetica", 10)
         payment_terms = f"Net {purchase_order.payment_days} days"
         if purchase_order.payment_terms:
             payment_terms += f" - {purchase_order.payment_terms}"
-        p.drawString(1*inch, height - 4.4*inch, payment_terms)
+        p.drawString(1*inch, height - 4.5*inch, payment_terms)
         
         # Add line items table
         p.setFont("Helvetica-Bold", 12)
-        p.drawString(1*inch, height - 4.8*inch, "Line Items:")
+        p.drawString(1*inch, height - 4.9*inch, "Line Items:")
         
         # Table headers
         p.setFont("Helvetica-Bold", 10)
-        p.drawString(1*inch, height - 5.1*inch, "Qty")
-        p.drawString(1.5*inch, height - 5.1*inch, "Description")
-        p.drawString(5*inch, height - 5.1*inch, "Rate")
-        p.drawString(6*inch, height - 5.1*inch, "Amount")
+        p.drawString(1*inch, height - 5.2*inch, "Qty")
+        p.drawString(1.5*inch, height - 5.2*inch, "Description")
+        p.drawString(5*inch, height - 5.2*inch, "Rate")
+        p.drawString(6*inch, height - 5.2*inch, "Amount")
         
         # Draw a line under the headers
-        p.line(1*inch, height - 5.2*inch, 7*inch, height - 5.2*inch)
+        p.line(1*inch, height - 5.3*inch, 7*inch, height - 5.3*inch)
         
         # Add line items
-        y_position = height - 5.5*inch
+        y_position = height - 5.6*inch
         p.setFont("Helvetica", 10)
         
         for item in purchase_order.line_items.all():
@@ -366,27 +372,60 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
             
             y_position -= (1 + len(notes_lines)*0.2)*inch
         
-        # Add approval stamp if selected
-        if purchase_order.approval_stamp != 'none':
-            stamp_filename = f"stamp-{purchase_order.approval_stamp}.png"
-            stamp_path = os.path.join(settings.BASE_DIR, 'static', 'images', stamp_filename)
-            if os.path.exists(stamp_path):
-                # Position the stamp in the bottom right area
-                p.drawImage(stamp_path, 5*inch, y_position - 1.5*inch, width=1.5*inch, preserveAspectRatio=True)
-            else:
-                print(f"Stamp not found at: {stamp_path}")
+        # Create a section for signatures and stamps
+        signature_y_position = y_position - 1.5*inch
         
-        # Add signature line
-        p.line(1*inch, y_position - 2*inch, 3*inch, y_position - 2*inch)
+        # Add "Generated by" first
         p.setFont("Helvetica", 10)
-        p.drawString(1*inch, y_position - 2.2*inch, "Authorized Signature")
+        p.drawString(1*inch, signature_y_position, f"Generated by: {purchase_order.user.get_full_name()}")
         
-        # Add signature image if available
+        # Add "Authorized Signature" line below
+        signature_y_position -= 0.4*inch
+        p.line(1*inch, signature_y_position, 3*inch, signature_y_position)
+        p.drawString(1*inch, signature_y_position - 0.2*inch, "Authorized Signature")
+        
         if purchase_order.signature:
-            p.drawImage(purchase_order.signature.path, 1*inch, y_position - 1.9*inch, width=2*inch, preserveAspectRatio=True)
+            # Position the signature directly below the "Authorized Signature" text
+            # Move it down to be below the "Authorized Signature" text
+            signature_y_position -= 0.5*inch
+            p.drawImage(purchase_order.signature.path, 1*inch, signature_y_position - 1*inch, width=2*inch, preserveAspectRatio=True)
         
-        # Add user name
-        p.drawString(1*inch, y_position - 2.5*inch, f"Generated by: {purchase_order.user.get_full_name() or purchase_order.user.username}")
+        # Calculate stamp positions for better geometric placement
+        # Position stamps to the right of the signature section with some spacing
+        stamp_x_position = 4.5*inch
+        stamp_y_position = signature_y_position
+        stamp_width = 1.8*inch
+        
+        # Add both stamps to the right of the signature section
+        # First, add the original stamp with 75% opacity (increased from 50%)
+        original_stamp_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'stamp-original.png')
+        if os.path.exists(original_stamp_path):
+            # Save the current graphics state
+            p.saveState()
+            # Set transparency for the original stamp (75% opacity)
+            p.setFillAlpha(0.95)
+            p.setStrokeAlpha(0.95)
+            # Position the original stamp at the top right
+            p.drawImage(original_stamp_path, stamp_x_position, stamp_y_position - 0.3*inch, width=stamp_width, preserveAspectRatio=True)
+            # Restore the graphics state
+            p.restoreState()
+        else:
+            print(f"Original stamp not found at: {original_stamp_path}")
+        
+        # Then, add the CIT stamp below the original stamp with 80% opacity
+        cit_stamp_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'stamp-cit.png')
+        if os.path.exists(cit_stamp_path):
+            # Save the current graphics state
+            p.saveState()
+            # Set transparency for the CIT stamp (80% opacity)
+            p.setFillAlpha(0.8)
+            p.setStrokeAlpha(0.8)
+            # Position the CIT stamp below the original stamp with some overlap
+            p.drawImage(cit_stamp_path, stamp_x_position, stamp_y_position - 1.2*inch, width=stamp_width, preserveAspectRatio=True)
+            # Restore the graphics state
+            p.restoreState()
+        else:
+            print(f"CIT stamp not found at: {cit_stamp_path}")
         
         # Close the PDF object cleanly
         p.showPage()

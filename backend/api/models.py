@@ -59,6 +59,7 @@ class PurchaseOrder(models.Model):
     APPROVAL_STAMP_CHOICES = [
         ('original', 'Original Stamp'),
         ('cit', 'CIT Stamp'),
+        ('both', 'Both Stamps'),
         ('none', 'No Stamp'),
     ]
     
@@ -114,4 +115,4 @@ class PurchaseOrder(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"PO #{self.po_number} - {self.vendor.name}" 
+        return f"PO #: {self.po_number} - {self.vendor.name}" 

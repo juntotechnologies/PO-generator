@@ -481,7 +481,7 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
                 payment_days: 30,
                 payment_terms: '',
                 notes: '',
-                approval_stamp: 'none',
+                approval_stamp: 'both',
                 line_items: []
               }
         }
@@ -788,23 +788,12 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
                       />
                     </Form.Group>
                     
-                    <Form.Group className="mb-3">
-                      <Form.Label>Approval Stamp</Form.Label>
-                      <Form.Select
-                        name="approval_stamp"
-                        value={values.approval_stamp}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        isInvalid={touched.approval_stamp && errors.approval_stamp}
-                      >
-                        <option value="none">No Stamp</option>
-                        <option value="original">Original Stamp</option>
-                        <option value="cit">CIT Stamp</option>
-                      </Form.Select>
-                      <Form.Control.Feedback type="invalid">
-                        {errors.approval_stamp}
-                      </Form.Control.Feedback>
-                    </Form.Group>
+                    {/* Hidden field for approval_stamp - we now include both stamps by default */}
+                    <input 
+                      type="hidden" 
+                      name="approval_stamp" 
+                      value="both" 
+                    />
                   </Card.Body>
                 </Card>
                 
@@ -818,7 +807,7 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
                     <p><strong>Payment Terms:</strong> {values.payment_terms ? `${values.payment_terms} (${values.payment_days} days)` : `Net ${values.payment_days} days`}</p>
                     <p><strong>Line Items:</strong> {values.line_items.length}</p>
                     <p><strong>Total Amount:</strong> ${calculateTotalAmount(values.line_items)}</p>
-                    <p><strong>Approval Stamp:</strong> {values.approval_stamp === 'none' ? 'No Stamp' : values.approval_stamp === 'original' ? 'Original Stamp' : 'CIT Stamp'}</p>
+                    <p><strong>Approval Stamps:</strong> Both CIT and Original stamps will be included</p>
                     
                     <div className="d-grid gap-2 mt-4">
                       <Button 

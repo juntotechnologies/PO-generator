@@ -21,7 +21,16 @@ const PurchaseOrders = () => {
         console.log('Fetching purchase orders...');
         const response = await axios.get('/api/purchase-orders/');
         console.log('Purchase orders response:', response.data);
-        setPurchaseOrders(response.data.results || response.data);
+        
+        // Get the purchase orders data
+        const poData = response.data.results || response.data;
+        
+        // Sort purchase orders by created_at in descending order (newest first)
+        const sortedPOs = [...poData].sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+        
+        setPurchaseOrders(sortedPOs);
       } catch (error) {
         console.error('Error fetching purchase orders:', error);
         setError('Failed to load purchase orders. Please try again later.');
@@ -214,7 +223,7 @@ const PurchaseOrders = () => {
                     {purchaseOrders.map(po => (
                       <tr key={po.id} className="po-list-item">
                         <td>
-                          <Badge bg="secondary" className="me-2">PO #{po.po_number}</Badge>
+                          <Badge bg="secondary" className="me-2">{po.po_number}</Badge>
                         </td>
                         <td>{formatDate(po.date)}</td>
                         <td>{po.vendor.name}</td>

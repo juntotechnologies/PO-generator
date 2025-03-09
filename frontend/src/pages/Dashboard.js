@@ -25,11 +25,16 @@ const Dashboard = () => {
           axios.get('/api/line-items/')
         ]);
 
+        // Sort purchase orders by created_at in descending order (newest first)
+        const sortedPOs = [...(poResponse.data.results || [])].sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+
         setStats({
           purchaseOrders: poResponse.data.count || poResponse.data.results.length,
           vendors: vendorResponse.data.count || vendorResponse.data.results.length,
           lineItems: lineItemResponse.data.count || lineItemResponse.data.results.length,
-          recentPOs: poResponse.data.results.slice(0, 5) // Get the 5 most recent POs
+          recentPOs: sortedPOs.slice(0, 5) // Get the 5 most recent POs
         });
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
@@ -108,7 +113,7 @@ const Dashboard = () => {
                       className="list-group-item list-group-item-action"
                     >
                       <div className="d-flex w-100 justify-content-between">
-                        <h5 className="mb-1">PO #{po.po_number}</h5>
+                        <h5 className="mb-1">{po.po_number}</h5>
                         <small>{new Date(po.date).toLocaleDateString()}</small>
                       </div>
                       <p className="mb-1">Vendor: {po.vendor.name}</p>
