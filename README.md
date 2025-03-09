@@ -1,59 +1,95 @@
-# PO Generator
+# Purchase Order Generator
 
-A Purchase Order and Invoice Generator for Chem Is Try Inc, designed to run as a permanent service on your local network.
+A web application for creating, managing, and generating Purchase Orders (POs) for businesses.
 
 ## Features
 
-- Create and manage Purchase Orders
-- Create and manage Invoices
-- Custom logo upload capability
-- Live preview of documents
-- PDF generation and download
-- Print functionality
-- Two approval stamp options
+- User authentication and identity verification
+- Purchase Order creation and management
+- Vendor management with templates
+- Line item management with templates
+- PDF generation for professional Purchase Orders
+- Customization options for payment terms, logos, and approval stamps
 
-## Permanent Deployment
+## Tech Stack
 
-This application is configured to run as a permanent service on port 4789, which ensures it's always available on your local network. 
+- **Frontend:** React
+- **Backend:** Django
+- **Database:** PostgreSQL
 
-### Quick Setup
+## Project Structure
 
-```bash
-# Make the deployment script executable if not already
-chmod +x deploy-prod-po-generator.sh
+The project is organized into two main directories:
 
-# Run the deployment script
-./deploy-prod-po-generator.sh
-```
+- `backend/`: Django REST API
+- `frontend/`: React application
 
-### Detailed Setup
-
-For detailed deployment instructions, see the [DEPLOY.md](DEPLOY.md) file.
-
-## Accessing the Application
-
-Once deployed, the application will be accessible at:
-
-- Local: http://localhost:4789
-- Network: http://YOUR_LOCAL_IP:4789
-
-## Development
+## Getting Started
 
 ### Prerequisites
 
-- Node.js
-- npm
+- Python 3.8+
+- Node.js 14+
+- PostgreSQL
 
-### Setup
+### Backend Setup
 
-```bash
-# Install dependencies
-npm install
+1. Navigate to the backend directory:
+   ```
+   cd backend
+   ```
 
-# Run in development mode
-./run-dev-po-generator.sh
-```
+2. Create a virtual environment:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Set up the database:
+   ```
+   python manage.py migrate
+   ```
+
+5. Create a superuser:
+   ```
+   python manage.py createsuperuser
+   ```
+
+6. Run the development server:
+   ```
+   python manage.py runserver
+   ```
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+   ```
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. Start the development server:
+   ```
+   npm start
+   ```
+
+## Usage
+
+1. Log in to the application
+2. Create vendors and save them as templates
+3. Create line items and save them as templates
+4. Create Purchase Orders by selecting vendors and line items
+5. Generate PDFs of your Purchase Orders
 
 ## License
 
-Copyright © 2023 Chem Is Try Inc. All rights reserved.
+This project is licensed under the MIT License - see the LICENSE file for details.
