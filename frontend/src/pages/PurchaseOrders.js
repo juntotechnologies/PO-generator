@@ -226,7 +226,7 @@ const PurchaseOrders = () => {
                           }
                         </td>
                         <td>
-                          <Link to={`/purchase-orders/${po.id}`}>
+                          <Link to={`/purchase-orders/edit/${po.id}`}>
                             <Button 
                               variant="outline-primary" 
                               size="sm" 

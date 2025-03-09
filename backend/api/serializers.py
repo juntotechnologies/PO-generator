@@ -5,8 +5,8 @@ from .models import Vendor, SavedVendor, LineItem, SavedLineItem, PurchaseOrder
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
-        read_only_fields = ['id']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined', 'last_login']
+        read_only_fields = ['id', 'username', 'date_joined', 'last_login']
 
 class VendorSerializer(serializers.ModelSerializer):
     class Meta:

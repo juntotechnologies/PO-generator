@@ -104,7 +104,7 @@ const Dashboard = () => {
                   {stats.recentPOs.map(po => (
                     <Link 
                       key={po.id} 
-                      to={`/purchase-orders/${po.id}`} 
+                      to={`/purchase-orders/edit/${po.id}`}
                       className="list-group-item list-group-item-action"
                     >
                       <div className="d-flex w-100 justify-content-between">

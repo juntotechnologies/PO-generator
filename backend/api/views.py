@@ -25,9 +25,25 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get', 'patch'])
     def me(self, request):
-        serializer = self.get_serializer(request.user)
+        """
+        Get or update the current user's information
+        """
+        user = request.user
+        
+        if request.method == 'PATCH':
+            # Only allow updating specific fields
+            allowed_fields = ['first_name', 'last_name', 'email']
+            data = {k: v for k, v in request.data.items() if k in allowed_fields}
+            
+            serializer = self.get_serializer(user, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = self.get_serializer(user)
         return Response(serializer.data)
 
 class VendorViewSet(viewsets.ModelViewSet):

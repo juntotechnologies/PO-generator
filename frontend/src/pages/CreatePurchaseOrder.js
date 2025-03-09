@@ -156,6 +156,10 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
     // Get the canvas context
     const ctx = canvas.getContext('2d');
     
+    // Clear the canvas with a white background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
     // Set up the canvas for a signature
     ctx.font = '60px "Brush Script MT", cursive';
     ctx.fillStyle = 'black';
@@ -167,6 +171,14 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
     
     // Position the signature in the middle of the canvas
     ctx.fillText(signatureName, canvas.width / 6, canvas.height / 2);
+    
+    // Add a signature line
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 6 - 20, canvas.height / 2 + 10);
+    ctx.lineTo(canvas.width / 6 + ctx.measureText(signatureName).width + 20, canvas.height / 2 + 10);
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    ctx.stroke();
     
     // Return the signature as a data URL
     return canvas.toDataURL('image/png');
@@ -950,7 +962,7 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
             {/* New Vendor Modal */}
             <Modal show={showNewVendorModal} onHide={() => setShowNewVendorModal(false)} size="lg">
               <Modal.Header closeButton>
-                <Modal.Title>Add Vendor</Modal.Title>
+                <Modal.Title>Add New Vendor</Modal.Title>
               </Modal.Header>
               <Formik
                 initialValues={{
