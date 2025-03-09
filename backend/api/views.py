@@ -220,12 +220,31 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         # Set up the document
         p.setTitle(f"Purchase Order #{purchase_order.po_number}")
         
-        # Add company logo
-        logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'cit-logo.png')
-        if os.path.exists(logo_path):
-            p.drawImage(logo_path, width - 2.5*inch, height - 1.2*inch, width=2*inch, preserveAspectRatio=True)
-        else:
-            print(f"Logo not found at: {logo_path}")
+        # Add company logo - try multiple paths to find the logo
+        logo_paths = [
+            os.path.join(settings.BASE_DIR, 'static', 'images', 'cit-logo.png'),
+            os.path.abspath(os.path.join(settings.BASE_DIR, '..', 'static', 'images', 'cit-logo.png')),
+            os.path.join(settings.STATIC_ROOT, 'images', 'cit-logo.png') if hasattr(settings, 'STATIC_ROOT') else None,
+            os.path.join(os.path.dirname(settings.BASE_DIR), 'backend', 'static', 'images', 'cit-logo.png'),
+            '/Users/shaun/Documents/GitHub/projects/PO-generator/backend/static/images/cit-logo.png'  # Direct path as a fallback
+        ]
+        
+        logo_found = False
+        for path in logo_paths:
+            if path and os.path.exists(path):
+                try:
+                    print(f"Found logo at: {path}")
+                    p.drawImage(path, width - 2.5*inch, height - 1.2*inch, width=2*inch, preserveAspectRatio=True)
+                    logo_found = True
+                    break
+                except Exception as e:
+                    print(f"Error drawing logo from {path}: {str(e)}")
+        
+        if not logo_found:
+            print("Logo not found in any of the attempted paths")
+            for path in logo_paths:
+                if path:
+                    print(f"Attempted path: {path}, exists: {os.path.exists(path)}")
         
         # Add header
         p.setFont("Helvetica-Bold", 18)
@@ -305,10 +324,18 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         # Draw a line above the total
         p.line(1*inch, y_position - 0.1*inch, 7*inch, y_position - 0.1*inch)
         
-        # Add total - remove the black box by not drawing a rectangle
+        # Add total - explicitly set fill color to ensure no black box
+        p.setFillColorRGB(0, 0, 0)  # Set fill color to black (text)
+        p.setStrokeColorRGB(1, 1, 1)  # Set stroke color to white (no visible border)
+        
+        # Reset any drawing state that might cause unwanted artifacts
+        p.saveState()
+        
         p.setFont("Helvetica-Bold", 12)
         p.drawString(5*inch, y_position - 0.4*inch, "Total:")
         p.drawString(6*inch, y_position - 0.4*inch, f"${purchase_order.total_amount:.2f}")
+        
+        p.restoreState()
         
         # Add notes if any
         if purchase_order.notes:

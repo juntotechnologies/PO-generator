@@ -7,10 +7,11 @@ import { FaPlus, FaTrash, FaSave, FaBookmark, FaCheck } from 'react-icons/fa';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
+import SignatureCanvas from 'react-signature-canvas';
 
 // Validation schema for purchase order
 const PurchaseOrderSchema = Yup.object().shape({
-  vendor_id: Yup.number().required('Vendor is required'),
+  vendor_id: Yup.string().required('Vendor is required'),
   date: Yup.date().required('Date is required'),
   payment_days: Yup.number()
     .required('Payment days is required')
@@ -35,6 +36,16 @@ const PurchaseOrderSchema = Yup.object().shape({
     .min(1, 'At least one line item is required')
 });
 
+// Validation schema for vendor
+const VendorSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
+  address: Yup.string().required('Address is required'),
+  city: Yup.string().required('City is required'),
+  state: Yup.string().required('State is required'),
+  zip_code: Yup.string().required('ZIP code is required'),
+  country: Yup.string().required('Country is required')
+});
+
 const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null }) => {
   const [vendors, setVendors] = useState([]);
   const [savedVendors, setSavedVendors] = useState([]);
@@ -47,6 +58,7 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
   const [showSavedLineItemsModal, setShowSavedLineItemsModal] = useState(false);
   const [formValues, setFormValues] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showNewVendorModal, setShowNewVendorModal] = useState(false);
   
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -379,6 +391,45 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
     await submitPurchaseOrderWithValues(formValues);
   };
 
+  // Handle creating a new vendor
+  const handleSaveNewVendor = async (values, { setSubmitting, resetForm, setFieldError }) => {
+    try {
+      console.log('Creating new vendor:', values);
+      const response = await axios.post('/api/vendors/', values);
+      console.log('Vendor creation response:', response.data);
+      
+      // Add to vendors list
+      setVendors([...vendors, response.data]);
+      
+      // Close modal and reset form
+      setShowNewVendorModal(false);
+      resetForm();
+      
+      // Select the newly created vendor in the purchase order form
+      // We need to use setFieldValue from the Formik context to update the form
+      // This will be passed from the Formik render prop
+      toast.success('Vendor created successfully');
+      
+      // Return the created vendor so it can be used by the caller
+      return response.data;
+    } catch (error) {
+      console.error('Error creating vendor:', error);
+      
+      if (error.response && error.response.data) {
+        // Handle validation errors from the server
+        const serverErrors = error.response.data;
+        Object.keys(serverErrors).forEach(key => {
+          setFieldError(key, serverErrors[key].join(', '));
+        });
+      } else {
+        toast.error('Failed to create vendor');
+      }
+      return null;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <Container className="text-center py-5">
@@ -444,7 +495,7 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
                   </Card.Header>
                   <Card.Body>
                     <Row className="mb-3">
-                      <Col md={9}>
+                      <Col md={6}>
                         <Form.Group>
                           <Form.Label>Vendor</Form.Label>
                           <Form.Select
@@ -474,6 +525,15 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
                           disabled={savedVendors.length === 0}
                         >
                           <FaBookmark className="me-1" /> Use Template
+                        </Button>
+                      </Col>
+                      <Col md={3} className="d-flex align-items-end">
+                        <Button 
+                          variant="success" 
+                          className="w-100"
+                          onClick={() => setShowNewVendorModal(true)}
+                        >
+                          <FaPlus className="me-1" /> Add Vendor
                         </Button>
                       </Col>
                     </Row>
@@ -885,6 +945,160 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
                   <FaCheck className="me-1" /> Apply Selected ({selectedSavedLineItems.length})
                 </Button>
               </Modal.Footer>
+            </Modal>
+            
+            {/* New Vendor Modal */}
+            <Modal show={showNewVendorModal} onHide={() => setShowNewVendorModal(false)} size="lg">
+              <Modal.Header closeButton>
+                <Modal.Title>Add Vendor</Modal.Title>
+              </Modal.Header>
+              <Formik
+                initialValues={{
+                  name: '',
+                  address: '',
+                  city: '',
+                  state: '',
+                  zip_code: '',
+                  country: ''
+                }}
+                validationSchema={VendorSchema}
+                onSubmit={async (values, formikHelpers) => {
+                  const newVendor = await handleSaveNewVendor(values, formikHelpers);
+                  if (newVendor) {
+                    // Use the setFieldValue from the parent Formik form to update the vendor_id
+                    setFieldValue('vendor_id', newVendor.id.toString());
+                  }
+                }}
+              >
+                {({
+                  values,
+                  errors,
+                  touched,
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  isSubmitting
+                }) => (
+                  <Form onSubmit={handleSubmit}>
+                    <Modal.Body>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="name"
+                          value={values.name}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          isInvalid={touched.name && errors.name}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.name}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                      <Form.Group className="mb-3">
+                        <Form.Label>Address</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="address"
+                          value={values.address}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          isInvalid={touched.address && errors.address}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.address}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>City</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="city"
+                              value={values.city}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={touched.city && errors.city}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>State</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="state"
+                              value={values.state}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={touched.state && errors.state}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.state}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>ZIP Code</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="zip_code"
+                              value={values.zip_code}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={touched.zip_code && errors.zip_code}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.zip_code}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Country</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="country"
+                              value={values.country}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={touched.country && errors.country}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.country}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="secondary" onClick={() => setShowNewVendorModal(false)}>
+                        Cancel
+                      </Button>
+                      <Button variant="primary" type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                          <>
+                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Vendor'
+                        )}
+                      </Button>
+                    </Modal.Footer>
+                  </Form>
+                )}
+              </Formik>
             </Modal>
           </Form>
         )}
