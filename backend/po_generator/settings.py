@@ -9,8 +9,14 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-development')
+# Determine which environment we're in
+DJANGO_ENV = os.getenv('DJANGO_ENV')
+
+# Use the appropriate secret key based on environment
+if DJANGO_ENV == 'production':
+    SECRET_KEY = os.getenv('PRODUCTION_SECRET_KEY', 'django-insecure-default-key-for-production')
+else:
+    SECRET_KEY = os.getenv('DEVELOPMENT_SECRET_KEY', 'django-insecure-default-key-for-development')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
@@ -70,18 +76,16 @@ WSGI_APPLICATION = 'po_generator.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Determine which environment we're in
-ENVIRONMENT = os.getenv('DJANGO_ENV', 'production')
-
 # Database name includes environment to keep them separate
-db_name_suffix = '' if ENVIRONMENT == 'production' else f'_{ENVIRONMENT}'
+
+# Database settings with environment-specific configurations
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', f'po_generator{db_name_suffix}'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+        'NAME': os.getenv('DB_NAME', f'po_generator_{DJANGO_ENV}'),
+        'USER': os.getenv('DB_USER', 'shaun'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
@@ -160,7 +164,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:4567',
     'http://127.0.0.1:4567',
     'http://100.106.104.3:4567',
-    'http://100.106.104.3:4789',
+    'http://100.106.104.3:4567',
 ]
 
 CORS_ALLOW_CREDENTIALS = True 
