@@ -42,11 +42,8 @@ check_database() {
     # Check if development database exists
     if ! PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -lqt | cut -d \| -f 1 | grep -qw "po_generator_development"; then
         echo "Development database 'po_generator_development' does not exist."
-        echo "Creating database..."
-        PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -c "CREATE DATABASE po_generator_development;" postgres
-        
         if [ $? -ne 0 ]; then
-            echo "Failed to create database. Please run ./backend/manage_db.sh and select option 5 to create databases."
+            echo "Please run ./backend/manage_db.sh and select option 5 to create databases."
             exit 1
         fi
     fi
