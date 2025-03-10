@@ -56,21 +56,52 @@ check_database() {
 echo "Setting up backend..."
 cd backend
 
-# Create virtual environment if it doesn't exist
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment with Python 3.11..."
-    uv venv --python 3.11 venv
+# Remove existing virtual environment if it exists
+if [ -d "venv" ]; then
+    echo "Removing existing virtual environment..."
+    rm -rf venv
+    rm -f venv/.dependencies_installed
 fi
+
+# Create a new virtual environment with Python 3.11
+echo "Creating virtual environment with Python 3.11..."
+uv venv --python 3.11 venv
 
 # Activate virtual environment
 source venv/bin/activate
 
-# Install dependencies if needed
-if [ ! -f "venv/.dependencies_installed" ]; then
-    echo "Installing dependencies..."
-    uv pip install -r requirements.txt
-    touch venv/.dependencies_installed
+# Install dependencies
+echo "Installing dependencies..."
+# Try installing dependencies
+if ! uv pip install -r requirements.txt; then
+    echo "Error: Failed to install dependencies."
+    echo "Trying alternative approach for Pillow..."
+    
+    # Try installing Pillow separately first with a newer version
+    if ! uv pip install pillow==10.2.0; then
+        echo "Error: Failed to install Pillow. Trying with system packages..."
+        
+        # On macOS, try installing with Homebrew dependencies
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            echo "Installing Pillow dependencies with Homebrew..."
+            brew install libjpeg libpng libtiff webp little-cms2 || true
+        fi
+        
+        # Try again with the latest version
+        if ! uv pip install pillow; then
+            echo "Error: Failed to install Pillow. Please check your Python installation."
+            exit 1
+        fi
+    fi
+    
+    # Then install the rest of the requirements
+    if ! uv pip install -r requirements.txt; then
+        echo "Error: Failed to install dependencies after Pillow fix."
+        exit 1
+    fi
 fi
+
+touch venv/.dependencies_installed
 
 # Check if development database exists
 check_database
