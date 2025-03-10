@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
+import axios from '../api/axios';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
 

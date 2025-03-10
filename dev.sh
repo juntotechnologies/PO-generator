@@ -26,6 +26,15 @@ PROJECT_DIR=$(dirname "$0")
 cd "$PROJECT_DIR"
 PROJECT_DIR=$(pwd)  # Get absolute path
 
+# Load environment variables
+if [ -f ".env" ]; then
+    source .env
+fi
+
+# Set default port values if not defined in .env
+DEV_BACKEND_PORT=${DEV_BACKEND_PORT:-8000}
+DEV_FRONTEND_PORT=${DEV_FRONTEND_PORT:-3000}
+
 # Check if PostgreSQL database exists
 check_database() {
     if ! command -v psql &> /dev/null; then
@@ -109,7 +118,7 @@ DJANGO_ENV=development uv run --python 3.11 manage.py migrate
 
 # Start Django development server in the background
 echo "Starting Django development server..."
-DJANGO_ENV=development DJANGO_DEBUG=True uv run --python 3.11 manage.py runserver 0.0.0.0:8001 &
+DJANGO_ENV=development DJANGO_DEBUG=True uv run --python 3.11 manage.py runserver 0.0.0.0:${DEV_BACKEND_PORT} &
 DJANGO_PID=$!
 
 # Deactivate virtual environment
@@ -127,14 +136,14 @@ fi
 
 # Start React development server
 echo "Starting React development server..."
-PORT=3000 npm start &
+PORT=${DEV_FRONTEND_PORT} npm start &
 REACT_PID=$!
 
 # Display information
 echo ""
 echo "Development servers started:"
-echo "Backend running at: http://localhost:8001"
-echo "Frontend running at: http://localhost:3000"
+echo "Backend running at: http://localhost:${DEV_BACKEND_PORT}"
+echo "Frontend running at: http://localhost:${DEV_FRONTEND_PORT}"
 echo ""
 echo "Press Ctrl+C to stop both servers"
 

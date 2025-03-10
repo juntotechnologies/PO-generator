@@ -7,6 +7,15 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 echo "Starting PO Generator deployment..."
 
+# Load environment variables
+if [ -f ".env" ]; then
+  source .env
+fi
+
+# Set default port values if not defined in .env
+PROD_BACKEND_PORT=${PROD_BACKEND_PORT:-8001}
+PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT:-4567}
+
 # Check if PM2 is installed
 if ! command -v pm2 &> /dev/null; then
     echo "PM2 is not installed. Installing PM2..."
@@ -70,7 +79,7 @@ fi
 
 # Run migrations
 echo "Running migrations..."
-if ! DJANGO_ENV=production uv run --python 3.11 manage.py migrate; then
+if ! DJANGO_ENV=production ENVIRONMENT=production uv run --python 3.11 manage.py migrate; then
     echo "Error: Failed to run migrations."
     exit 1
 fi
@@ -84,13 +93,13 @@ fi
 
 # Create a simple script to run the Django server
 echo "Creating run script for Django..."
-cat > run_django.sh << 'EOL'
+cat > run_django.sh << EOL
 #!/bin/bash
-cd "$(dirname "$0")"
+cd "\$(dirname "\$0")"
 source venv/bin/activate
 export DJANGO_ENV=production
 export DJANGO_DEBUG=False
-uv run --active manage.py runserver 0.0.0.0:8000
+uv run --active manage.py runserver 0.0.0.0:${PROD_BACKEND_PORT}
 EOL
 
 # Make the script executable
@@ -123,8 +132,8 @@ if ! npm run build; then
 fi
 
 # Create a simple server file for serving on custom port
-echo "Creating server file for port 4567..."
-cat > server.js << 'EOL'
+echo "Creating server file for port ${PROD_FRONTEND_PORT}..."
+cat > server.js << EOL
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -137,9 +146,9 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-const PORT = process.env.PORT || 4567;
+const PORT = process.env.PORT || ${PROD_FRONTEND_PORT};
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(\`Server running on port \${PORT}\`);
 });
 EOL
 
@@ -151,10 +160,10 @@ fi
 
 # Create a simple script to run the Node server
 echo "Creating run script for Node..."
-cat > run_node.sh << 'EOL'
+cat > run_node.sh << EOL
 #!/bin/bash
-cd "$(dirname "$0")"
-export PORT=4567
+cd "\$(dirname "\$0")"
+export PORT=${PROD_FRONTEND_PORT}
 export NODE_ENV=production
 node server.js
 EOL
@@ -163,7 +172,7 @@ EOL
 chmod +x run_node.sh
 
 # Configure PM2 for React
-echo "Configuring PM2 for React on port 4567..."
+echo "Configuring PM2 for React on port ${PROD_FRONTEND_PORT}..."
 pm2 delete po-generator-frontend 2>/dev/null || true
 pm2 start --name po-generator-frontend "$PROJECT_DIR/frontend/run_node.sh"
 
@@ -172,8 +181,8 @@ echo "Saving PM2 configuration..."
 pm2 save
 
 echo "Deployment completed successfully!"
-echo "Backend running at: http://localhost:8000"
-echo "Frontend running at: http://localhost:4567"
+echo "Backend running at: http://localhost:${PROD_BACKEND_PORT}"
+echo "Frontend running at: http://localhost:${PROD_FRONTEND_PORT}"
 echo ""
 echo "To check status: pm2 status"
 echo "To view logs: pm2 logs"

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaFileAlt, FaBuilding, FaList, FaPlus } from 'react-icons/fa';
-import axios from 'axios';
+import axios from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 
 const Dashboard = () => {

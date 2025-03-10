@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Table, Spinner, Alert, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaFilePdf, FaEye, FaCopy } from 'react-icons/fa';
-import axios from 'axios';
+import axios from '../api/axios';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
 

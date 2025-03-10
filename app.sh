@@ -40,10 +40,16 @@ check_port() {
   fi
 }
 
-# Load environment variables from .env file (but don't rely on ENVIRONMENT)
+# Load environment variables from .env file
 if [ -f ".env" ]; then
   source .env
 fi
+
+# Set default port values if not defined in .env
+DEV_BACKEND_PORT=${DEV_BACKEND_PORT:-8000}
+DEV_FRONTEND_PORT=${DEV_FRONTEND_PORT:-3000}
+PROD_BACKEND_PORT=${PROD_BACKEND_PORT:-8001}
+PROD_FRONTEND_PORT=${PROD_FRONTEND_PORT:-4567}
 
 # Parse command-line arguments
 COMMAND=""
@@ -145,9 +151,11 @@ run_migrations() {
   # Set environment variables for the migration
   if [ "$ENVIRONMENT" = "production" ]; then
     export DJANGO_ENV=production
+    export ENVIRONMENT=production
     export DJANGO_DEBUG=False
   else
     export DJANGO_ENV=development
+    export ENVIRONMENT=development
     export DJANGO_DEBUG=True
   fi
   
@@ -166,24 +174,24 @@ setup_frontend_prod() {
   (cd "$FRONTEND_DIR" && npm run build) || exit 1
   
   # Create server.js in frontend directory
-  cat > "$FRONTEND_DIR/server.js" << 'EOL'
+  cat > "$FRONTEND_DIR/server.js" << EOL
 const express = require('express');
 const path = require('path');
 const app = express();
 app.use(express.static(path.join(__dirname, 'build')));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'build', 'index.html')));
-const PORT = process.env.PORT || 4567;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || ${PROD_FRONTEND_PORT};
+app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));
 EOL
 
   # Install express
   (cd "$FRONTEND_DIR" && npm install --save express) || exit 1
   
   # Create run_node.sh script
-  cat > "$FRONTEND_DIR/run_node.sh" << 'EOL'
+  cat > "$FRONTEND_DIR/run_node.sh" << EOL
 #!/bin/bash
-cd "$(dirname "$0")"
-export PORT=4567
+cd "\$(dirname "\$0")"
+export PORT=${PROD_FRONTEND_PORT}
 export NODE_ENV=production
 node server.js
 EOL
@@ -196,13 +204,13 @@ configure_pm2() {
   command -v pm2 &> /dev/null || npm install -g pm2
   
   # Create run script for Django
-  cat > "$BACKEND_DIR/run_django.sh" << 'EOL'
+  cat > "$BACKEND_DIR/run_django.sh" << EOL
 #!/bin/bash
-cd "$(dirname "$0")"
+cd "\$(dirname "\$0")"
 source venv/bin/activate
 export DJANGO_ENV=production
 export DJANGO_DEBUG=False
-uv run --active manage.py runserver 0.0.0.0:8000
+uv run --active manage.py runserver 0.0.0.0:${PROD_BACKEND_PORT}
 EOL
   chmod +x "$BACKEND_DIR/run_django.sh"
   
@@ -243,16 +251,16 @@ case "$COMMAND" in
     run_migrations
     
     if [ "$ENVIRONMENT" = "production" ]; then
-      # Check ports for production: backend on 8000 and frontend on 4567
-      check_port 8000
-      check_port 4567
+      # Check ports for production
+      check_port ${PROD_BACKEND_PORT}
+      check_port ${PROD_FRONTEND_PORT}
       setup_frontend_prod
       configure_pm2
-      echo "Production deployment completed. Backend at http://localhost:8000, Frontend at http://localhost:4567."
+      echo "Production deployment completed. Backend at http://localhost:${PROD_BACKEND_PORT}, Frontend at http://localhost:${PROD_FRONTEND_PORT}."
     else
-      # Check ports for development: backend on 8001 and frontend on 3000
-      check_port 8001
-      check_port 3000
+      # Check ports for development
+      check_port ${DEV_BACKEND_PORT}
+      check_port ${DEV_FRONTEND_PORT}
       
       # For development: start servers directly without PM2
       # Activate virtual environment without changing directory
@@ -261,7 +269,7 @@ case "$COMMAND" in
       # Start Django server from project root
       export DJANGO_ENV=development
       export DJANGO_DEBUG=True
-      uv run --python 3.11 "$BACKEND_DIR/manage.py" runserver 0.0.0.0:8001 &
+      uv run --python 3.11 "$BACKEND_DIR/manage.py" runserver 0.0.0.0:${DEV_BACKEND_PORT} &
       DJANGO_PID=$!
       
       # Deactivate virtual environment
@@ -269,10 +277,10 @@ case "$COMMAND" in
       
       # Start React development server
       (cd "$FRONTEND_DIR" && [ -d "node_modules" ] || npm install)
-      (cd "$FRONTEND_DIR" && PORT=3000 npm start) &
+      (cd "$FRONTEND_DIR" && PORT=${DEV_FRONTEND_PORT} npm start) &
       REACT_PID=$!
       
-      echo "Development servers started: Backend at http://localhost:8001, Frontend at http://localhost:3000."
+      echo "Development servers started: Backend at http://localhost:${DEV_BACKEND_PORT}, Frontend at http://localhost:${DEV_FRONTEND_PORT}."
       echo "Press Ctrl+C to stop both servers"
       
       # Wait for user to press Ctrl+C

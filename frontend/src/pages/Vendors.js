@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Modal, Form, Table, Spinner } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaSave, FaBookmark } from 'react-icons/fa';
-import axios from 'axios';
+import axios from '../api/axios';
 import { toast } from 'react-toastify';
 import { Formik } from 'formik';
 import * as Yup from 'yup';

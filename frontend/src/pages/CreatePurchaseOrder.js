@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Formik, FieldArray, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { FaPlus, FaTrash, FaSave, FaBookmark, FaCheck } from 'react-icons/fa';
-import axios from 'axios';
+import axios from '../api/axios';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
 import SignatureCanvas from 'react-signature-canvas';

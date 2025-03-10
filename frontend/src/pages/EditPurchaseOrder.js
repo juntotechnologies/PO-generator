@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Spinner, Alert, Button } from 'react-bootstrap';
-import axios from 'axios';
+import axios from '../api/axios';
 import { toast } from 'react-toastify';
 import CreatePurchaseOrder from './CreatePurchaseOrder';
 
