@@ -51,4 +51,7 @@ node_modules/
 
 # Deployment
 /uploads/
-/temp/
+/temp/# Database backups and sensitive data
+*.sql
+users.csv
+
