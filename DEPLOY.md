@@ -1,6 +1,6 @@
 # PO Generator Deployment Guide
 
-This guide will help you set up the PO Generator application as a permanent service on your local network, accessible 24/7 on port 4789.
+This guide will help you set up the PO Generator application as a permanent service on your local network, accessible 24/7 on port 4567.
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ chmod +x deploy-prod-po-generator.sh
 ```
 
 This script will automatically:
-1. Check for and stop any existing process on port 4789
+1. Check for and stop any existing process on port 4567
 2. Install PM2 if not already installed
 3. Create the logs directory
 4. Install dependencies
@@ -76,8 +76,8 @@ Follow the instructions provided by the command.
 
 Once deployed, the application will be accessible at:
 
-- Local: http://localhost:4789
-- Network: http://YOUR_LOCAL_IP:4789
+- Local: http://localhost:4567
+- Network: http://YOUR_LOCAL_IP:4567
 
 Replace `YOUR_LOCAL_IP` with the IP address of the machine running the application.
 
@@ -132,7 +132,7 @@ If the application is not accessible:
 
 2. Check if the port is in use:
    ```bash
-   lsof -i :4789
+   lsof -i :4567
    ```
 
 3. Review the logs:
@@ -140,7 +140,7 @@ If the application is not accessible:
    pm2 logs po-generator
    ```
 
-4. Ensure your firewall allows traffic on port 4789.
+4. Ensure your firewall allows traffic on port 4567.
 
 ## Updating the Application
 
