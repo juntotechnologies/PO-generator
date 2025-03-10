@@ -10,10 +10,11 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Determine which environment we're in
-DJANGO_ENV = os.getenv('DJANGO_ENV')
+BASE_DB_NAME = os.getenv("BASE_DB_NAME")
+ENVIRONMENT = os.getenv('ENVIRONMENT')
 
 # Use the appropriate secret key based on environment
-if DJANGO_ENV == 'production':
+if ENVIRONMENT == 'production':
     SECRET_KEY = os.getenv('PRODUCTION_SECRET_KEY', 'django-insecure-default-key-for-production')
 else:
     SECRET_KEY = os.getenv('DEVELOPMENT_SECRET_KEY', 'django-insecure-default-key-for-development')
@@ -83,7 +84,7 @@ WSGI_APPLICATION = 'po_generator.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', f'po_generator_{DJANGO_ENV}'),
+        'NAME': f'{BASE_DB_NAME}_{ENVIRONMENT}',
         'USER': os.getenv('DB_USER', 'shaun'),
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
         'HOST': os.getenv('DB_HOST', 'localhost'),
