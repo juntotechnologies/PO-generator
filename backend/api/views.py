@@ -1,21 +1,23 @@
-from django.contrib.auth.models import User
+import os
+import json
+from datetime import timedelta
+from io import BytesIO
 from django.http import HttpResponse
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.utils import timezone
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 from .models import Vendor, SavedVendor, LineItem, SavedLineItem, PurchaseOrder
 from .serializers import (
     UserSerializer, VendorSerializer, SavedVendorSerializer,
     LineItemSerializer, SavedLineItemSerializer, PurchaseOrderSerializer
 )
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-from io import BytesIO
-from django.conf import settings
-import os
-import json
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -236,47 +238,75 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         # Set up the document
         p.setTitle(f"Purchase Order - {purchase_order.po_number}")
         
-        # Add company logo - try multiple paths to find the logo
-        logo_paths = [
-            os.path.join(settings.BASE_DIR, 'static', 'images', 'cit-logo.png'),
-            os.path.abspath(os.path.join(settings.BASE_DIR, '..', 'static', 'images', 'cit-logo.png')),
-            os.path.join(settings.STATIC_ROOT, 'images', 'cit-logo.png') if hasattr(settings, 'STATIC_ROOT') else None,
-            os.path.join(os.path.dirname(settings.BASE_DIR), 'backend', 'static', 'images', 'cit-logo.png'),
-            '/Users/shaun/Documents/GitHub/projects/PO-generator/backend/static/images/cit-logo.png'  # Direct path as a fallback
-        ]
+        # Add company logo - using PIL approach that worked temporarily
+        try:
+            # Import required libraries
+            from PIL import Image
+            import tempfile
+            
+            # Define the logo path
+            logo_path = '/Users/shaun/Documents/GitHub/projects/PO-generator/backend/static/images/cit-logo.png'
+            
+            # Check if the file exists
+            if os.path.exists(logo_path):
+                print(f"Logo file exists at: {logo_path}")
+                
+                # Open the image with PIL
+                img = Image.open(logo_path)
+                print(f"Image opened: format={img.format}, size={img.size}, mode={img.mode}")
+                
+                # Convert to RGB if needed
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                    print("Converted image to RGB mode")
+                
+                # Create a temporary file
+                with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as temp_file:
+                    temp_path = temp_file.name
+                    print(f"Created temporary file: {temp_path}")
+                
+                # Save the image to the temporary file
+                img.save(temp_path, format='PNG')
+                print(f"Saved image to temporary file")
+                
+                # Get the original image dimensions
+                img_width, img_height = img.size
+                aspect_ratio = img_width / img_height
+                print(f"Original image dimensions: {img_width}x{img_height}, aspect ratio: {aspect_ratio}")
+                
+                # Calculate new dimensions that maintain the aspect ratio
+                target_height = 1*inch
+                target_width = target_height * aspect_ratio
+                print(f"Target dimensions: {target_width}x{target_height}")
+                
+                # Add the image to the PDF - now in the top left with proper aspect ratio
+                p.drawInlineImage(temp_path, 0.3*inch, height - 1*inch, width=target_width*0.7, height=target_height*0.7)
+                print("Added logo to PDF using drawInlineImage with calculated dimensions")
+                
+                # Clean up the temporary file
+                os.unlink(temp_path)
+                print("Removed temporary file")
+            else:
+                print(f"Logo file does not exist at: {logo_path}")
+        except Exception as e:
+            print(f"Error adding logo to PDF: {str(e)}")
+            import traceback
+            traceback.print_exc()
         
-        logo_found = False
-        for path in logo_paths:
-            if path and os.path.exists(path):
-                try:
-                    print(f"Found logo at: {path}")
-                    p.drawImage(path, width - 2.5*inch, height - 1.2*inch, width=2*inch, preserveAspectRatio=True)
-                    logo_found = True
-                    break
-                except Exception as e:
-                    print(f"Error drawing logo from {path}: {str(e)}")
-        
-        if not logo_found:
-            print("Logo not found in any of the attempted paths")
-            for path in logo_paths:
-                if path:
-                    print(f"Attempted path: {path}, exists: {os.path.exists(path)}")
-        
-        # Add header
+        # Add header - moved further to the right
         p.setFont("Helvetica-Bold", 18)
-        p.drawString(1*inch, height - 1*inch, "PURCHASE ORDER")
+        p.drawString(width - 2.7*inch, height - 0.5*inch, "PURCHASE ORDER")
         
         # Add PO number on a separate line below the title
         p.setFont("Helvetica-Bold", 14)
-        p.drawString(1*inch, height - 1.3*inch, f"{purchase_order.po_number}")
+        p.drawString(width - 2.3*inch, height - 0.8*inch, f"PO #{purchase_order.po_number}")
         
-        # Add date in the top right corner
+        # Add date in the top right corner below the PO number
         p.setFont("Helvetica", 12)
         date_text = f"Date: {purchase_order.date.strftime('%B %d, %Y')}"
-        date_width = p.stringWidth(date_text, "Helvetica", 12)
-        p.drawString(width - 1*inch - date_width, height - 1*inch, date_text)
+        p.drawString(width - 2.3*inch, height - 1.1*inch, date_text)
         
-        # Add company information
+        # Add company information - now below the logo
         p.setFont("Helvetica", 10)
         p.drawString(1*inch, height - 1.7*inch, "Chem Is Try Inc")
         p.drawString(1*inch, height - 1.9*inch, "160-4 Liberty Street")
@@ -392,8 +422,8 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         
         # Calculate stamp positions for better geometric placement
         # Position stamps to the right of the signature section with some spacing
-        stamp_x_position = 4.5*inch
-        stamp_y_position = signature_y_position
+        stamp_x_position = 4.5*inch + 0.7*inch
+        stamp_y_position = signature_y_position + 0.5*inch
         stamp_width = 1.8*inch
         
         # Add both stamps to the right of the signature section
