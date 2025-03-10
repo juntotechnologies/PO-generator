@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-development')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -70,10 +70,16 @@ WSGI_APPLICATION = 'po_generator.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# Determine which environment we're in
+ENVIRONMENT = os.getenv('DJANGO_ENV', 'production')
+
+# Database name includes environment to keep them separate
+db_name_suffix = '' if ENVIRONMENT == 'production' else f'_{ENVIRONMENT}'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'po_generator'),
+        'NAME': os.getenv('DB_NAME', f'po_generator{db_name_suffix}'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
@@ -151,6 +157,10 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'http://localhost:4567',
+    'http://127.0.0.1:4567',
+    'http://100.106.104.3:4567',
+    'http://100.106.104.3:4789',
 ]
 
 CORS_ALLOW_CREDENTIALS = True 
