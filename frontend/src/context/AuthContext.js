@@ -66,8 +66,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to run only once on mount
+  }, [fetchUserData]); // Add fetchUserData as a dependency
 
   const login = async (username, password) => {
     try {
@@ -151,8 +150,7 @@ export const AuthProvider = ({ children }) => {
     return () => {
       axios.interceptors.response.eject(interceptor);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to run only once on mount
+  }, [refreshToken]); // Add refreshToken as a dependency
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, updateUserInfo }}>

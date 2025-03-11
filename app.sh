@@ -171,7 +171,7 @@ setup_frontend_prod() {
   echo "Setting up frontend for production..."
   # Run npm commands in the frontend directory
   (cd "$FRONTEND_DIR" && npm install) || exit 1
-  (cd "$FRONTEND_DIR" && npm run build) || exit 1
+  (cd "$FRONTEND_DIR" && DISABLE_ESLINT_PLUGIN=true npm run build) || exit 1
   
   # Create server.js in frontend directory
   cat > "$FRONTEND_DIR/server.js" << EOL
@@ -187,15 +187,29 @@ EOL
   # Install express
   (cd "$FRONTEND_DIR" && npm install --save express) || exit 1
   
-  # Create run_node.sh script
-  cat > "$FRONTEND_DIR/run_node.sh" << EOL
+  # Create run_node.sh script if it doesn't exist
+  if [ ! -f "$FRONTEND_DIR/run_node.sh" ]; then
+    cat > "$FRONTEND_DIR/run_node.sh" << EOL
 #!/bin/bash
 cd "\$(dirname "\$0")"
-export PORT=${PROD_FRONTEND_PORT}
-export NODE_ENV=production
-node server.js
+
+# Get environment from command line argument, default to production if not provided
+ENV=\${1:-production}
+
+if [ "\$ENV" = "development" ] || [ "\$ENV" = "dev" ]; then
+  export NODE_ENV=development
+  export PORT=\${DEV_FRONTEND_PORT:-3000}
+  export REACT_APP_API_URL=http://localhost:\${DEV_BACKEND_PORT:-8000}
+  npm start
+else
+  export NODE_ENV=production
+  export PORT=\${PROD_FRONTEND_PORT:-4567}
+  export REACT_APP_API_URL=http://localhost:\${PROD_BACKEND_PORT:-8001}
+  node server.js
+fi
 EOL
-  chmod +x "$FRONTEND_DIR/run_node.sh"
+    chmod +x "$FRONTEND_DIR/run_node.sh"
+  fi
 }
 
 # Function: Configure PM2 for production
@@ -203,23 +217,15 @@ configure_pm2() {
   echo "Configuring PM2 for production..."
   command -v pm2 &> /dev/null || npm install -g pm2
   
-  # Create run script for Django
-  cat > "$BACKEND_DIR/run_django.sh" << EOL
-#!/bin/bash
-cd "\$(dirname "\$0")"
-source "../.venv/bin/activate"
-export DJANGO_ENV=production
-export ENVIRONMENT=production
-export DJANGO_DEBUG=False
-uv run --active manage.py runserver 0.0.0.0:\${PROD_BACKEND_PORT}
-EOL
-  chmod +x "$BACKEND_DIR/run_django.sh"
+  # Ensure run scripts exist and are executable
+  chmod +x "$BACKEND_DIR/run_django.sh" 2>/dev/null || true
+  chmod +x "$FRONTEND_DIR/run_node.sh" 2>/dev/null || true
   
   # Configure PM2
   pm2 delete po-generator-backend 2>/dev/null || true
-  pm2 start --name po-generator-backend "$BACKEND_DIR/run_django.sh"
+  pm2 start --name po-generator-backend "$BACKEND_DIR/run_django.sh" -- production
   pm2 delete po-generator-frontend 2>/dev/null || true
-  pm2 start --name po-generator-frontend "$FRONTEND_DIR/run_node.sh"
+  pm2 start --name po-generator-frontend "$FRONTEND_DIR/run_node.sh" -- production
   pm2 save
 }
 
@@ -263,23 +269,13 @@ case "$COMMAND" in
       check_port ${DEV_BACKEND_PORT}
       check_port ${DEV_FRONTEND_PORT}
       
-      # For development: start servers directly without PM2
-      # Activate virtual environment without changing directory
-      source "$PROJECT_DIR/.venv/bin/activate"
-      
-      # Start Django server from project root
-      export DJANGO_ENV=development
-      export ENVIRONMENT=development
-      export DJANGO_DEBUG=True
-      uv run --python 3.11 "$BACKEND_DIR/manage.py" runserver 0.0.0.0:${DEV_BACKEND_PORT} &
+      # For development: start servers using the run scripts
+      "$BACKEND_DIR/run_django.sh" development &
       DJANGO_PID=$!
-      
-      # Deactivate virtual environment
-      deactivate
       
       # Start React development server
       (cd "$FRONTEND_DIR" && [ -d "node_modules" ] || npm install)
-      (cd "$FRONTEND_DIR" && FAST_REFRESH=true WDS_SOCKET_PORT=${DEV_FRONTEND_PORT} PORT=${DEV_FRONTEND_PORT} npm start) &
+      "$FRONTEND_DIR/run_node.sh" development &
       REACT_PID=$!
       
       echo "Development servers started: Backend at http://localhost:${DEV_BACKEND_PORT}, Frontend at http://localhost:${DEV_FRONTEND_PORT}."
