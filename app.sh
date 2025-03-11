@@ -279,7 +279,7 @@ case "$COMMAND" in
       
       # Start React development server
       (cd "$FRONTEND_DIR" && [ -d "node_modules" ] || npm install)
-      (cd "$FRONTEND_DIR" && PORT=${DEV_FRONTEND_PORT} npm start) &
+      (cd "$FRONTEND_DIR" && FAST_REFRESH=true PORT=${DEV_FRONTEND_PORT} npm start) &
       REACT_PID=$!
       
       echo "Development servers started: Backend at http://localhost:${DEV_BACKEND_PORT}, Frontend at http://localhost:${DEV_FRONTEND_PORT}."
