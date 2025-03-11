@@ -64,13 +64,42 @@ code {
 }
 
 .auth-container {
-  max-width: 400px;
+  max-width: 380px !important;
+  width: 380px !important;
   margin: 100px auto;
 }
 
-.auth-form {
-  background-color: white;
-  padding: 30px;
-  border-radius: 5px;
+.auth-container .auth-form {
+  background-color: white !important;
+  width: 100% !important;
+  max-width: 320px !important;
+  margin: 0 auto;
+  padding: 25px;
+  border-radius: 20px;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.auth-form .form-control {
+  height: 40px;
+  font-size: 15px;
+  padding: 8px 12px;
+  margin-bottom: 15px;
+}
+
+.auth-form .btn {
+  padding: 8px 25px;
+  font-size: 15px;
+  min-width: 100px;
+}
+
+.auth-form h4 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.auth-form p {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 20px;
 } 

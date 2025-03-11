@@ -10,7 +10,7 @@ const PurchaseOrders = () => {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useContext(AuthContext);
+  const { } = useContext(AuthContext);
 
   // Fetch purchase orders
   useEffect(() => {

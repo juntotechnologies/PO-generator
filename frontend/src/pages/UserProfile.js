@@ -14,7 +14,7 @@ const UserProfileSchema = Yup.object().shape({
 });
 
 const UserProfile = () => {
-  const { user, updateUserInfo } = useContext(AuthContext);
+  const { updateUserInfo } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
