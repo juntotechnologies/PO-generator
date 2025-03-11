@@ -162,6 +162,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     f'http://localhost:{os.getenv("DEV_FRONTEND_PORT", "3000")}',
     f'http://127.0.0.1:{os.getenv("DEV_FRONTEND_PORT", "3000")}',
+    f'http://100.106.104.3:{os.getenv("DEV_FRONTEND_PORT", "3000")}',
     f'http://localhost:{os.getenv("PROD_FRONTEND_PORT", "4567")}',
     f'http://127.0.0.1:{os.getenv("PROD_FRONTEND_PORT", "4567")}',
     f'http://100.106.104.3:{os.getenv("PROD_FRONTEND_PORT", "4567")}',

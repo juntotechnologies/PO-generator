@@ -30,13 +30,15 @@ const Login = () => {
     
     setIsLoading(true);
     try {
+      console.log('Attempting login with:', { username, password: '********' });
       const success = await login(username, password);
       if (!success) {
-        setError('Invalid credentials');
+        setError('Invalid credentials. Please check your username and password.');
+        console.error('Login failed with success=false');
       }
     } catch (err) {
+      console.error('Login error details:', err);
       setError('An error occurred during login. Please try again.');
-      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }

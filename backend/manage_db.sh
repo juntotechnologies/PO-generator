@@ -15,14 +15,15 @@ fi
 # Navigate to the script directory
 SCRIPT_DIR=$(dirname "$0")
 cd "$SCRIPT_DIR"
+PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 
 # Function to activate virtual environment
 activate_venv() {
-    if [ ! -d "venv" ]; then
+    if [ ! -d "$PROJECT_ROOT/.venv" ]; then
         echo "Virtual environment not found. Creating one..."
-        uv venv --python 3.11 venv
+        uv venv --python 3.11 "$PROJECT_ROOT/.venv"
     fi
-    source venv/bin/activate
+    source "$PROJECT_ROOT/.venv/bin/activate"
 }
 
 # Function to deactivate virtual environment

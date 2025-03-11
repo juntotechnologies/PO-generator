@@ -115,14 +115,14 @@ FRONTEND_DIR="$PROJECT_DIR/frontend"
 # Function: Setup Backend
 setup_backend() {
   echo "Setting up backend environment for $ENVIRONMENT..."
-  # Create virtual environment in the backend directory but run commands from project root
-  [ -d "$BACKEND_DIR/venv" ] && rm -rf "$BACKEND_DIR/venv"
+  # Create virtual environment in the project root directory
+  [ -d "$PROJECT_DIR/.venv" ] && rm -rf "$PROJECT_DIR/.venv"
   
-  # Create venv in backend directory
-  uv venv --python 3.11 "$BACKEND_DIR/venv"
+  # Create venv in project root directory
+  uv venv --python 3.11 "$PROJECT_DIR/.venv"
   
   # Activate the virtual environment
-  source "$BACKEND_DIR/venv/bin/activate"
+  source "$PROJECT_DIR/.venv/bin/activate"
   
   # Check if requirements.txt exists in backend directory, if not use the one in project root
   if [ -f "$BACKEND_DIR/requirements.txt" ]; then
@@ -146,7 +146,7 @@ setup_backend() {
 # Function: Run migrations
 run_migrations() {
   echo "Running migrations for $ENVIRONMENT..."
-  source "$BACKEND_DIR/venv/bin/activate"
+  source "$PROJECT_DIR/.venv/bin/activate"
   
   # Set environment variables for the migration
   if [ "$ENVIRONMENT" = "production" ]; then
@@ -207,10 +207,11 @@ configure_pm2() {
   cat > "$BACKEND_DIR/run_django.sh" << EOL
 #!/bin/bash
 cd "\$(dirname "\$0")"
-source venv/bin/activate
+source "../.venv/bin/activate"
 export DJANGO_ENV=production
+export ENVIRONMENT=production
 export DJANGO_DEBUG=False
-uv run --active manage.py runserver 0.0.0.0:${PROD_BACKEND_PORT}
+uv run --active manage.py runserver 0.0.0.0:\${PROD_BACKEND_PORT}
 EOL
   chmod +x "$BACKEND_DIR/run_django.sh"
   
@@ -234,7 +235,7 @@ case "$COMMAND" in
     
   "migrate")
     # Make sure backend is set up
-    if [ ! -d "$BACKEND_DIR/venv" ]; then
+    if [ ! -d "$PROJECT_DIR/.venv" ]; then
       setup_backend
     fi
     run_migrations
@@ -243,7 +244,7 @@ case "$COMMAND" in
     
   "run")
     # Make sure backend is set up
-    if [ ! -d "$BACKEND_DIR/venv" ]; then
+    if [ ! -d "$PROJECT_DIR/.venv" ]; then
       setup_backend
     fi
     
@@ -264,10 +265,11 @@ case "$COMMAND" in
       
       # For development: start servers directly without PM2
       # Activate virtual environment without changing directory
-      source "$BACKEND_DIR/venv/bin/activate"
+      source "$PROJECT_DIR/.venv/bin/activate"
       
       # Start Django server from project root
       export DJANGO_ENV=development
+      export ENVIRONMENT=development
       export DJANGO_DEBUG=True
       uv run --python 3.11 "$BACKEND_DIR/manage.py" runserver 0.0.0.0:${DEV_BACKEND_PORT} &
       DJANGO_PID=$!

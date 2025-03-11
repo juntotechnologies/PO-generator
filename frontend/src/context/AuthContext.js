@@ -39,10 +39,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
+      console.log('AuthContext: Attempting login for user:', username);
+      console.log('AuthContext: Using axios baseURL:', axios.defaults.baseURL);
+      
       const response = await axios.post('/api/token/', {
         username,
         password
       });
+      
+      console.log('AuthContext: Login response received:', response.status);
       
       const { access, refresh } = response.data;
       localStorage.setItem('token', access);
@@ -53,8 +58,28 @@ export const AuthProvider = ({ children }) => {
       toast.success('Login successful!');
       return true;
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error(error.response?.data?.detail || 'Login failed. Please check your credentials.');
+      console.error('AuthContext: Login error details:', error);
+      console.error('AuthContext: Error response:', error.response?.data);
+      
+      // Provide more specific error messages based on the error
+      let errorMessage = 'Login failed. Please check your credentials.';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        if (error.response.status === 401) {
+          errorMessage = 'Invalid username or password.';
+        } else if (error.response.status === 400) {
+          errorMessage = 'Invalid request. Please check your input.';
+        } else if (error.response.status >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response from server. Please check your connection.';
+      }
+      
+      toast.error(errorMessage);
       return false;
     }
   };

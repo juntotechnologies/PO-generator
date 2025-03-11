@@ -33,53 +33,23 @@ A web application for creating, managing, and generating PDF purchase orders wit
    ```
    Then select option 5 to create the PostgreSQL databases.
 
-### Backend Setup
+### Project Setup
 
-1. Navigate to the backend directory:
-   ```
-   cd backend
-   ```
+The project uses a single virtual environment in the `.venv` directory at the project root. All scripts have been configured to use this environment.
 
-2. Create a virtual environment:
+1. Make the app.sh script executable:
    ```
-   python -m venv venv
+   chmod +x app.sh
    ```
 
-3. Activate the virtual environment:
-   - On Windows: `venv\Scripts\activate`
-   - On macOS/Linux: `source venv/bin/activate`
-
-4. Install dependencies:
+2. Setup the development environment:
    ```
-   pip install uv
-   uv pip install -r requirements.txt
+   ./app.sh setup dev
    ```
 
-5. Run migrations:
+3. Setup the production environment:
    ```
-   uv run --python 3.11 manage.py migrate
-   ```
-
-6. Create a superuser:
-   ```
-   uv run --python 3.11 manage.py create_user admin yourpassword --email admin@example.com --is_superuser
-   ```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```
-   npm install
-   ```
-
-3. Build the frontend (for production):
-   ```
-   npm run build
+   ./app.sh setup prod
    ```
 
 ## Development and Production Workflow
@@ -91,12 +61,11 @@ This application supports separate development and production environments with 
 Run the development server with:
 
 ```
-chmod +x dev.sh
-./dev.sh
+./app.sh dev
 ```
 
 This will:
-1. Start the Django development server on port 8001
+1. Start the Django development server on port 8000
 2. Start the React development server on port 3000
 3. Use a separate PostgreSQL database for development (`po_generator_development`)
 
@@ -105,8 +74,7 @@ This will:
 Deploy to production with:
 
 ```
-chmod +x deploy.sh
-./deploy.sh
+./app.sh prod
 ```
 
 This will:
@@ -115,7 +83,7 @@ This will:
 3. Run migrations on the production database
 4. Build the frontend
 5. Configure PM2 to run both the backend and frontend servers:
-   - Backend: http://localhost:8000
+   - Backend: http://localhost:8001
    - Frontend: http://localhost:4567
 
 ### Database Management
@@ -165,4 +133,4 @@ This script provides options to:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
