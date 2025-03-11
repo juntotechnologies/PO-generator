@@ -7,7 +7,6 @@ import { FaPlus, FaTrash, FaSave, FaBookmark, FaCheck } from 'react-icons/fa';
 import axios from '../api/axios';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
-import SignatureCanvas from 'react-signature-canvas';
 
 // Validation schema for purchase order
 const PurchaseOrderSchema = Yup.object().shape({
@@ -49,14 +48,12 @@ const VendorSchema = Yup.object().shape({
 const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null }) => {
   const [vendors, setVendors] = useState([]);
   const [savedVendors, setSavedVendors] = useState([]);
-  const [lineItems, setLineItems] = useState([]);
   const [savedLineItems, setSavedLineItems] = useState([]);
   const [selectedSavedLineItems, setSelectedSavedLineItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSavedVendorsModal, setShowSavedVendorsModal] = useState(false);
   const [showSavedLineItemsModal, setShowSavedLineItemsModal] = useState(false);
-  const [formValues, setFormValues] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [showNewVendorModal, setShowNewVendorModal] = useState(false);
   
@@ -212,7 +209,7 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
     formikSetSubmitting(false);
   };
 
-  // Create a new function that takes values directly
+  // Submit the purchase order with the given values
   const submitPurchaseOrderWithValues = async (values) => {
     setSubmitting(true);
     
@@ -390,17 +387,6 @@ const CreatePurchaseOrder = ({ isEditing = false, initialPurchaseOrder = null })
       toast.error(`An unexpected error occurred: ${error.message}`);
       setSubmitting(false);
     }
-  };
-
-  // Keep the old submitPurchaseOrder function for backward compatibility
-  // but make it call the new function
-  const submitPurchaseOrder = async () => {
-    if (!formValues) {
-      toast.error('Form values are missing');
-      return;
-    }
-    
-    await submitPurchaseOrderWithValues(formValues);
   };
 
   // Handle creating a new vendor

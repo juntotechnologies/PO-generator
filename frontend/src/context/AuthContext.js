@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { toast } from 'react-toastify';
@@ -10,17 +10,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if user is already logged in
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetchUserData(token);
-    } else {
-      setLoading(false);
-    }
-  }, []);
+  // Define logout function
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+    navigate('/login');
+  }, [navigate]);
 
-  const fetchUserData = async (token) => {
+  // Define fetchUserData function
+  const fetchUserData = useCallback(async (token) => {
     try {
       const config = {
         headers: {
@@ -31,11 +30,44 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('AuthContext: Error fetching user data:', error);
       logout();
       setLoading(false);
     }
-  };
+  }, [logout]);
+
+  // Define refreshToken function
+  const refreshToken = useCallback(async () => {
+    try {
+      const refresh = localStorage.getItem('refreshToken');
+      if (!refresh) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await axios.post('/api/token/refresh/', {
+        refresh
+      });
+
+      const { access } = response.data;
+      localStorage.setItem('token', access);
+      return access;
+    } catch (error) {
+      console.error('AuthContext: Token refresh error:', error);
+      logout();
+      throw error;
+    }
+  }, [logout]);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchUserData(token);
+    } else {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array to run only once on mount
 
   const login = async (username, password) => {
     try {
@@ -84,40 +116,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    setUser(null);
-    navigate('/login');
-  };
-
   const updateUserInfo = (updatedUserData) => {
     // Update the user state with the new data
     setUser(prevUser => ({
       ...prevUser,
       ...updatedUserData
     }));
-  };
-
-  const refreshToken = async () => {
-    try {
-      const refresh = localStorage.getItem('refreshToken');
-      if (!refresh) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await axios.post('/api/token/refresh/', {
-        refresh
-      });
-
-      const { access } = response.data;
-      localStorage.setItem('token', access);
-      return access;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      logout();
-      throw error;
-    }
   };
 
   // Set up axios interceptor for token refresh
@@ -147,7 +151,8 @@ export const AuthProvider = ({ children }) => {
     return () => {
       axios.interceptors.response.eject(interceptor);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array to run only once on mount
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, updateUserInfo }}>

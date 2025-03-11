@@ -45,27 +45,28 @@ const Login = () => {
   };
 
   return (
-    <Container className="auth-container">
-      <Card className="auth-form">
+    <Container className="auth-container" style={{ maxWidth: '320px', width: '320px' }}>
+      <Card className="auth-form" style={{ maxWidth: '320px', width: '100%' }}>
         <Card.Body>
-          <h2 className="text-center mb-4">Purchase Order Generator</h2>
-          <h4 className="text-center mb-4">Login</h4>
+          <h4 className="text-center mb-3 login-title">PO Generator</h4>
+          <p className="text-center login-subtitle mb-3">Login</p>
           
-          {error && <Alert variant="danger">{error}</Alert>}
+          {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
           
-          <Form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit} className="mt-3">
             <Form.Group className="mb-3" controlId="username">
               <Form.Label>Username</Form.Label>
               <Form.Control
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
+                placeholder="Username"
                 required
+                style={{ fontSize: '14px' }}
               />
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="password">
+            <Form.Group className="mb-4" controlId="password">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -73,31 +74,35 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 required
+                style={{ fontSize: '14px' }}
               />
             </Form.Group>
 
-            <Button 
-              variant="primary" 
-              type="submit" 
-              className="w-100 mt-3" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                    className="me-2"
-                  />
-                  Logging in...
-                </>
-              ) : (
-                'Login'
-              )}
-            </Button>
+            <div className="d-flex justify-content-center mt-4">
+              <Button 
+                variant="primary" 
+                type="submit" 
+                className="px-4" 
+                disabled={isLoading}
+                style={{ fontSize: '14px' }}
+              >
+                {isLoading ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      className="me-2"
+                    />
+                    <span>Login</span>
+                  </>
+                ) : (
+                  'Login'
+                )}
+              </Button>
+            </div>
           </Form>
         </Card.Body>
       </Card>

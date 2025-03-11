@@ -1,12 +1,11 @@
 import React, { useContext } from 'react';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaUser, FaSignOutAlt, FaCog } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 
 const Navigation = () => {
   const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();

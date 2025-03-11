@@ -31,7 +31,7 @@ const Vendors = () => {
   const [currentVendor, setCurrentVendor] = useState(null);
   const [templateVendor, setTemplateVendor] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { } = useContext(AuthContext);
 
   // Fetch vendors and saved vendor templates
   useEffect(() => {

@@ -36,7 +36,7 @@ const LineItems = () => {
   const [currentLineItem, setCurrentLineItem] = useState(null);
   const [templateLineItem, setTemplateLineItem] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { } = useContext(AuthContext);
 
   // Fetch line items and saved line item templates
   useEffect(() => {
