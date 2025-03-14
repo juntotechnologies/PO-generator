@@ -22,7 +22,7 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,100.106.104.3,192.168.1.200').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,100.106.104.3,192.168.1.200,0.0.0.0').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -174,6 +174,8 @@ CORS_ALLOWED_ORIGINS = [
     f'http://100.106.104.3:{os.getenv("PROD_BACKEND_PORT", "8001")}',
     f'http://192.168.1.200:{os.getenv("PROD_FRONTEND_PORT", "4567")}',
     f'http://192.168.1.200:{os.getenv("PROD_BACKEND_PORT", "8001")}',
+    f'http://0.0.0.0:{os.getenv("PROD_FRONTEND_PORT", "4567")}',
+    f'http://0.0.0.0:{os.getenv("PROD_BACKEND_PORT", "8001")}',
 ]
 
 CORS_ALLOW_CREDENTIALS = True 
