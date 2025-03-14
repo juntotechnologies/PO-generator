@@ -172,6 +172,8 @@ CORS_ALLOWED_ORIGINS = [
     f'http://localhost:{os.getenv("PROD_BACKEND_PORT", "8001")}',
     f'http://127.0.0.1:{os.getenv("PROD_BACKEND_PORT", "8001")}',
     f'http://100.106.104.3:{os.getenv("PROD_BACKEND_PORT", "8001")}',
+    f'http://192.168.1.200:{os.getenv("PROD_BACKEND_PORT", "8001")}',
+    f'http://192.168.1.200:{os.getenv("PROD_FRONTEND_PORT", "4567")}',
 ]
 
 CORS_ALLOW_CREDENTIALS = True 
