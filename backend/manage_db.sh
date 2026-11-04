@@ -8,7 +8,7 @@ set -e  # Exit immediately if a command exits with a non-zero status
 # Check if uv is installed
 if ! command -v uv &> /dev/null; then
     echo "uv is not installed. Please install uv and try again."
-    echo "You can install it using: pip install uv"
+    echo "Install it from https://docs.astral.sh/uv/getting-started/installation/"
     exit 1
 fi
 
